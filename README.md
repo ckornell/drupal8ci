@@ -4,4 +4,6 @@
 
 Drupal 8 CI image for [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal)
 
-Based on  Drupal official image + Php imagick xdebug + Composer + Robo CI.
+Fork from [juampynr/drupal8ci](https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/)
+
+Based on  [Drupal official image](https://hub.docker.com/_/drupal/) + Php extension imagick xdebug + [Composer](https://getcomposer.org) + [Robo CI](http://robo.li).
