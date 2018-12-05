@@ -1,0 +1,99 @@
+image: docker:stable
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - release
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  TEST_IMAGE: registry.gitlab.com/mog33/docker-images
+  RELEASE_REGISTRY: docker.io
+  RELEASE_IMAGE: index.docker.io/$RELEASE_USER
+
+################################################################################
+# Templates to avoid repeat. A bit Xtrem here!
+# https://docs.gitlab.com/ee/ci/yaml/#anchors
+################################################################################
+
+.docker_login_gitlab:
+  - &docker_login_gitlab docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+
+.docker_build_push:
+  script: &docker_build_push
+    - docker build --pull --tag $TEST_IMAGE/$IMAGE $DIR
+    - docker push $TEST_IMAGE/$IMAGE
+
+.build_push: &build_push
+  stage: build
+  script: *docker_build_push
+
+.docker_pull:
+  - &docker_pull docker pull $TEST_IMAGE/$IMAGE
+
+.make_build:
+  - &make_build apk --no-cache add make gettext && make build
+
+.build_image: &build_image
+  stage: build images
+  before_script:
+    - *docker_login_gitlab
+    - *make_build
+    - sed -i 's#FROM ${RELEASE_USER}#FROM ${TEST_IMAGE}#g' ${DIR}/Dockerfile
+  script: *docker_build_push
+
+.test_images: &test_images
+  stage: test images
+  before_script:
+    - *docker_login_gitlab
+    - *docker_pull
+    - docker run -d -t --name test $TEST_IMAGE/$IMAGE
+
+.test_drupal8ci: &test_drupal8ci
+  <<: *test_images
+  script:
+    - docker exec test php -v
+    - docker exec test a2query -s 000-default
+    - docker exec test robo -V
+
+.release: &release
+  stage: release
+  before_script:
+    - docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
+  script:
+    - *docker_pull
+    - docker tag $TEST_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker push $RELEASE_IMAGE/$IMAGE
+  only:
+    - master
+
+################################################################################
+# Jobs based on previous templates.
+# Only variables need to be changed if needed.
+################################################################################
+
+before_script:
+  - *docker_login_gitlab
+  - *make_build
+
+drupal8ci:
+  <<: *build_image
+  before_script:
+    - *docker_login_gitlab
+  variables:
+    IMAGE: drupal8ci:8.6
+    DIR: drupal8ci/8.6
+
+test:drupal8ci:
+  <<: *test_drupal8ci
+  variables:
+    IMAGE: drupal8ci:8.6
+
+release:drupal8ci:
+  <<: *release
+  variables:
+    IMAGE: drupal8ci:8.6
