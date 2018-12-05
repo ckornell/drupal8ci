@@ -28,10 +28,6 @@ variables:
     - docker build --pull --tag $TEST_IMAGE/$IMAGE $DIR
     - docker push $TEST_IMAGE/$IMAGE
 
-.build_push: &build_push
-  stage: build
-  script: *docker_build_push
-
 .docker_pull:
   - &docker_pull docker pull $TEST_IMAGE/$IMAGE
 
@@ -39,7 +35,7 @@ variables:
   - &make_build apk --no-cache add make gettext && make build
 
 .build_image: &build_image
-  stage: build images
+  stage: build
   before_script:
     - *docker_login_gitlab
     - *make_build
@@ -47,7 +43,7 @@ variables:
   script: *docker_build_push
 
 .test_images: &test_images
-  stage: test images
+  stage: test
   before_script:
     - *docker_login_gitlab
     - *docker_pull
