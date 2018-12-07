@@ -14,28 +14,28 @@ RUN curl -fsSL https://robo.li/robo.phar -o robo.phar \
   && mv robo.phar /usr/local/bin/robo
 
 # Install needed programs.
-RUN apt-get update && apt-get install — no-install-recommends -y \
-  imagemagick \
-  libmagickwand-dev \
-  mariadb-client \
-  git \
-  rsync \
+RUN apt-get update && apt-get install --no-install-recommends -y \
   sudo \
-  unzip \
   apt-transport-https \
   gnupg2 \
   software-properties-common
 
-# Install Docker, Nodejs and Yarn.
+# Install Docker, Nodejs, Yarn and programs for next steps.
 RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
   && echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" | sudo tee /etc/apt/sources.list.d/docker.list \
   && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
-  && apt-get update && apt-get install — no-install-recommends -y \
+  && apt-get update && apt-get install --no-install-recommends -y \
   docker-ce \
   nodejs \
   yarn \
+  imagemagick \
+  libmagickwand-dev \
+  mariadb-client \
+  git \
+  rsync \
+  unzip \
   && rm -rf /var/lib/apt/lists/*
 
 # Install mysqli, xdebug, imagick.
