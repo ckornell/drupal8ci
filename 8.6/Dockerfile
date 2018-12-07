@@ -27,7 +27,9 @@ RUN apt-get update && apt-get install -y \
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
-  && sudo apt-get update && sudo apt-get install yarn
+  && apt-get update && apt-get install -y \
+  nodejs \
+  yarn
 
 # Install mysqli, xdebug, imagick.
 RUN docker-php-ext-install mysqli \
