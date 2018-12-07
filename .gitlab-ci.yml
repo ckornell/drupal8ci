@@ -59,8 +59,7 @@ variables:
 .test_composerci: &test_composerci
   <<: *test_images
   script:
-    - docker exec test /usr/bin/composer -V
-    - docker exec test /usr/local/bin/robo -V
+    - docker exec test -V
 
 .release: &release
   stage: release
