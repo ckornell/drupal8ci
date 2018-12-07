@@ -56,11 +56,6 @@ variables:
     - docker exec test a2query -s 000-default
     - docker exec test robo -V
 
-.test_composerci: &test_composerci
-  <<: *test_images
-  script:
-    - docker exec test -V
-
 .release: &release
   stage: release
   before_script:
@@ -98,21 +93,3 @@ release:drupal8ci:
   <<: *release
   variables:
     IMAGE: drupal8ci:8.6
-
-composerci:
-  <<: *build_image
-  before_script:
-    - *docker_login_gitlab
-  variables:
-    IMAGE: composerci:latest
-    DIR: 'composer'
-
-test:composerci:
-  <<: *test_composerci
-  variables:
-    IMAGE: composerci:latest
-
-release:composerci:
-  <<: *release
-  variables:
-    IMAGE: composerci:latest
