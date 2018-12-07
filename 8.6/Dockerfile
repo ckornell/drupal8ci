@@ -12,9 +12,6 @@ RUN curl -fsSL https://robo.li/robo.phar -o robo.phar \
   && chmod +x robo.phar \
   && mv robo.phar /usr/local/bin/robo
 
-# Install Nodejs
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-
 # Install needed programs.
 RUN apt-get update && apt-get install -y \
   imagemagick \
@@ -24,7 +21,15 @@ RUN apt-get update && apt-get install -y \
   rsync \
   sudo \
   unzip \
-  nodejs
+  gnupg
+
+# Install Nodejs and Yarn.
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+  && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
+  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update && apt-get install -y \
+  nodejs \
+  yarn
 
 # Install mysqli, xdebug, imagick.
 RUN docker-php-ext-install mysqli \
