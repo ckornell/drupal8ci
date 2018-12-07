@@ -12,6 +12,9 @@ RUN curl -fsSL https://robo.li/robo.phar -o robo.phar \
   && chmod +x robo.phar \
   && mv robo.phar /usr/local/bin/robo
 
+# Install Nodejs
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+
 # Install needed programs.
 RUN apt-get update && apt-get install -y \
   imagemagick \
@@ -20,7 +23,8 @@ RUN apt-get update && apt-get install -y \
   git \
   rsync \
   sudo \
-  unzip
+  unzip \
+  nodejs
 
 # Install mysqli, xdebug, imagick.
 RUN docker-php-ext-install mysqli \
