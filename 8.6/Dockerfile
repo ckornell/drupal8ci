@@ -27,7 +27,7 @@ FROM drupal:8.6-apache
 RUN echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" | tee /etc/apt/sources.list.d/docker.list \
   && echo "deb https://deb.nodesource.com/node_10.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-  && apt-get update --allow-untrusted && apt-get install --allow-untrusted -y \
+  && apt-get update && apt-get install --allow-untrusted -y \
   docker-ce \
   nodejs \
   yarn
