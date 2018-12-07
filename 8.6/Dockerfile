@@ -1,5 +1,6 @@
-# https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
-# https://github.com/docker-library/drupal/blob/master/8.6/apache/Dockerfile
+# Inspired by https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
+# Based on https://github.com/docker-library/drupal/blob/master/8.6/apache/Dockerfile
+# Which is based on https://github.com/docker-library/php/blob/master/7.2/stretch/apache/Dockerfile
 FROM drupal:8.6-apache
 
 # Install composer.
@@ -25,7 +26,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install Docker, NodeJs, Yarn.
 RUN curl -sSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
-  && echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list \
+  && echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" | sudo tee /etc/apt/sources.list.d/docker.list \
   && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
