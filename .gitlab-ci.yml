@@ -94,3 +94,8 @@ release:drupal8ci:
   <<: *release
   variables:
     IMAGE: drupal8ci:8.6
+
+release:drupal8ci:
+  <<: *release
+  variables:
+    IMAGE: drupal8ci:latest
