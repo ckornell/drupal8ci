@@ -14,23 +14,30 @@ FROM drupal:8.6-apache
 #  && mv robo.phar /usr/local/bin/robo
 
 # Install needed programs.
-#RUN apt-get update && apt-get install -y \
-#  imagemagick \
-#  libmagickwand-dev \
-#  mariadb-client \
-#  git \
-#  rsync \
-#  sudo \
-#  unzip
+RUN apt-get update && apt-get install -y \
+  imagemagick \
+  libmagickwand-dev \
+  mariadb-client \
+  git \
+  rsync \
+  sudo \
+  unzip \
+  apt-transport-https \
+  ca-certificates \
+  gnupg2 \
+  software-properties-common
 
-# Install Docker, NodeJs, Yarn.
-RUN echo "deb [arch=amd64] http://download.docker.com/linux/debian stretch stable" | tee /etc/apt/sources.list.d/docker.list \
-  && echo "deb http://deb.nodesource.com/node_10.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list \
-  && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-  && apt-get update && apt-get install --allow-untrusted -y \
+# Install Docker, Nodejs and Yarn.
+RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
+  && echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" | sudo tee /etc/apt/sources.list.d/docker.list \
+  && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+  && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
+  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
+  && apt-get update && apt-get install -y \
   docker-ce \
   nodejs \
   yarn
+
 
 # Install mysqli, xdebug, imagick.
 #RUN docker-php-ext-install mysqli \
