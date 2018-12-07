@@ -55,7 +55,7 @@ variables:
     - docker exec test php -v
     - docker exec test a2query -s 000-default
     - docker exec test robo -V
-    - docker exec test node yarn version
+    - docker exec test yarn version
 
 .release: &release
   stage: release
