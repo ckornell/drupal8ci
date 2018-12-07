@@ -24,9 +24,9 @@ FROM drupal:8.6-apache
 #  unzip
 
 # Install Docker, NodeJs, Yarn.
-RUN echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" | tee /etc/apt/sources.list.d/docker.list \
-  && echo "deb https://deb.nodesource.com/node_10.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list \
-  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+RUN echo "deb [arch=amd64] http://download.docker.com/linux/debian stretch stable" | tee /etc/apt/sources.list.d/docker.list \
+  && echo "deb http://deb.nodesource.com/node_10.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list \
+  && echo "deb http://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
   && apt-get update && apt-get install --allow-untrusted -y \
   docker-ce \
   nodejs \
