@@ -21,13 +21,16 @@ RUN apt-get update && apt-get install -y \
   rsync \
   sudo \
   unzip \
-  gnupg
+  gnupg2
 
-# Install Nodejs and Yarn.
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+# Install Docker, NodeJs, Yarn.
+RUN curl -sSL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
+  && echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list \
+  && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
   && apt-get update && apt-get install -y \
+  docker-ce \
   nodejs \
   yarn
 

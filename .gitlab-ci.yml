@@ -56,6 +56,7 @@ variables:
     - docker exec test a2query -s 000-default
     - docker exec test robo -V
     - docker exec test yarn versions
+    - docker exec test docker --version
 
 .release: &release
   stage: release
