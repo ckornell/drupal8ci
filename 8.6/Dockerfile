@@ -36,14 +36,14 @@ RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 RUN composer global require \
-  hirak/prestissimo --no-ansi --no-progess --no-suggest --prefer-dist --profile \
+  hirak/prestissimo --no-ansi --no-progress --no-suggest --prefer-dist --profile \
   && composer global require \
-  edgedesign/phpqa --update-no-dev --no-ansi --no-progess --no-suggest --prefer-dist --profile \
+  edgedesign/phpqa --update-no-dev --no-ansi --no-progress --no-suggest --prefer-dist --profile \
   && composer global require \
   consolidation/robo drupal/coder jakub-onderka/php-parallel-lint jakub-onderka/php-console-highlighter \
-  vimeo/psalm sensiolabs/security-checker  --no-ansi --no-progess --no-suggest --prefer-dist --profile \
+  vimeo/psalm sensiolabs/security-checker  --no-ansi --no-progress --no-suggest --prefer-dist --profile \
   && composer global require \
-  dealerdirect/phpcodesniffer-composer-installer --no-ansi --no-progess --no-suggest --prefer-dist --profile \
+  dealerdirect/phpcodesniffer-composer-installer --no-ansi --no-progress --no-suggest --prefer-dist --profile \
   && rm -rf ~/.composer/cache/*
 
 # Remove the memory limit for the CLI only.
@@ -57,6 +57,7 @@ RUN sed -ri -e 's!/var/www/html!/var/www/html/web!g' /etc/apache2/sites-availabl
   && sed -ri -e 's!/var/www!/var/www/html/web!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 ENV PATH="~/.composer/vendor/bin:${PATH}"
+ENV NPM_CONFIG_UNSAFE_PERM true
 
 COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/run-tests.sh
