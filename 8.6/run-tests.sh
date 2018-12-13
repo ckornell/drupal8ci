@@ -37,6 +37,14 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v node)" ]; then
+  printf "Node "
+  node --version
+else
+  printf "%node missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ -x "$(command -v yarn)" ]; then
   yarn versions | grep 'versions'
 else
