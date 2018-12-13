@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-export PATH=$PATH:~/.composer/vendor/bin;
-
 red=$'\e[1;31m'
 grn=$'\e[1;32m'
 end=$'\e[0m'
 __error=0
+
+printf "PATH: %s\\n" "${PATH}"
 
 if [ -x "$(command -v php)" ]; then
   php -v | grep built

@@ -6,12 +6,15 @@
 
 ![](https://img.shields.io/github/license/Mogtofu33/drupal8ci.svg)
 
-Drupal 8 CI image for [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal)
+Drupal 8 CI image for [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal), with all tools needed for CI Build/Tests.
 
 - Fork from [juampynr/drupal8ci](https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/)
 - Based on  [Drupal official image](https://hub.docker.com/_/drupal/), added
-  - Php extensions: xsl imagick xdebug
-  - Mariadb (MySQL) client
+  - [Node.js](https://nodejs.org/en/) 10 + [Yarn](https://yarnpkg.com)
+  - [Php + Apache](https://github.com/docker-library/php/tree/master/7.2/stretch/apache) added extensions: xsl, imagick, xdebug
   - [Composer](https://getcomposer.org) + [Prestissimo plugin](https://github.com/hirak/prestissimo)
   - [Robo CI](http://robo.li)
   - [Phpqa](https://github.com/EdgedesignCZ/phpqa)
+  - [Docker CE](https://store.docker.com/search?type=edition&offering=community)
+  - [Drupal Coder](https://www.drupal.org/project/coder)
+  - Mariadb (MySQL) client
