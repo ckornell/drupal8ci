@@ -39,7 +39,7 @@ RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 COPY composer.json /root/composer.json
-RUN composer global install --no-ansi -n --profile \
+RUN composer global install --no-ansi -n --profile /root/composer.json \
   && rm -rf ~/.composer/cache/* \
   && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
   && ls -lA /usr/local/bin
