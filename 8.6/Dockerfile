@@ -45,7 +45,7 @@ RUN composer global install --no-ansi -n --profile \
   && ls -lA /usr/local/bin
 
 # Add some npm tools for Drupal 8.6+ with extra sass-lint.
-COPY https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
+ADD https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
 RUN npm -g config set user root \
   && npm -g config set unsafe-perm true \
   && npm -g install --no-audit /root/package.json \
