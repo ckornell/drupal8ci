@@ -77,8 +77,6 @@ before_script:
 
 drupal8.6ci:
   <<: *build_image
-  before_script:
-    - *docker_login_gitlab
   variables:
     IMAGE: drupal8ci:8.6
     DIR: '8.6'
