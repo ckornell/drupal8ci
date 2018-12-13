@@ -10,7 +10,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   sudo \
   apt-transport-https \
   gnupg2 \
-  software-properties-common
+  software-properties-common \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && rm /var/log/lastlog /var/log/faillog
 
 # Install Docker, Nodejs, Yarn programs for next steps and php extensions.
 RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
@@ -31,8 +34,10 @@ RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
   # Install xsl, mysqli, xdebug, imagick.
   && docker-php-ext-install xsl mysqli \
   && pecl install imagick xdebug \
-  && docker-php-ext-enable imagick xdebug\
-  && rm -rf /var/lib/apt/lists/*
+  && docker-php-ext-enable imagick xdebug \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && rm /var/log/lastlog /var/log/faillog
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 RUN composer global require --no-ansi --no-progress --no-suggest --prefer-dist --profile \
