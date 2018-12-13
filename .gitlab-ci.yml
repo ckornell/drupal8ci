@@ -47,12 +47,11 @@ variables:
   before_script:
     - *docker_login_gitlab
     - *docker_pull
-    - docker run -d -t --name test $CI_REGISTRY_IMAGE/$IMAGE
 
 .test_drupal8ci: &test_drupal8ci
   <<: *test_images
   script:
-    - docker exec test /scripts/run-tests.sh
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
 
 .release: &release
   stage: release
