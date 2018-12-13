@@ -11,7 +11,6 @@ stages:
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
-  TEST_IMAGE: registry.gitlab.com/mog33/drupal8ci
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
 
@@ -23,13 +22,15 @@ variables:
 .docker_login_gitlab:
   - &docker_login_gitlab docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
 
+.docker_pull:
+  - &docker_pull docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
+
 .docker_build_push:
   script: &docker_build_push
-    - docker build --pull --tag $TEST_IMAGE/$IMAGE $DIR
-    - docker push $TEST_IMAGE/$IMAGE
-
-.docker_pull:
-  - &docker_pull docker pull $TEST_IMAGE/$IMAGE
+    - *docker_pull
+    # - docker build --pull --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    - docker build --compress --cache-from $RELEASE_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE
 
 .make_build:
   - &make_build apk --no-cache add make gettext && make build
@@ -39,24 +40,20 @@ variables:
   before_script:
     - *docker_login_gitlab
     - *make_build
-    - sed -i 's#FROM ${RELEASE_USER}#FROM ${TEST_IMAGE}#g' ${DIR}/Dockerfile
+    - sed -i 's#FROM ${RELEASE_USER}#FROM ${CI_REGISTRY_IMAGE}#g' ${DIR}/Dockerfile
   script: *docker_build_push
 
-.test_images: &test_images
+.CI_REGISTRY_IMAGE: &CI_REGISTRY_IMAGE
   stage: test
   before_script:
     - *docker_login_gitlab
     - *docker_pull
-    - docker run -d -t --name test $TEST_IMAGE/$IMAGE
+    - docker run -d -t --name test $CI_REGISTRY_IMAGE/$IMAGE
 
 .test_drupal8ci: &test_drupal8ci
-  <<: *test_images
+  <<: *CI_REGISTRY_IMAGE
   script:
-    - docker exec test php -v
-    - docker exec test a2query -s 000-default
-    - docker exec test robo -V
-    - docker exec test yarn versions
-    - docker exec test docker --version
+    - docker exec test /scripts/run-tests.sh
 
 .release: &release
   stage: release
@@ -64,8 +61,9 @@ variables:
     - docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
   script:
     - *docker_pull
-    - docker tag $TEST_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
     - docker push $RELEASE_IMAGE/$IMAGE
+    - docker push $RELEASE_IMAGE/drupal8ci:latest
   only:
     - master
 
@@ -78,7 +76,7 @@ before_script:
   - *docker_login_gitlab
   - *make_build
 
-drupal8ci:
+drupal8.6ci:
   <<: *build_image
   before_script:
     - *docker_login_gitlab
@@ -86,12 +84,12 @@ drupal8ci:
     IMAGE: drupal8ci:8.6
     DIR: '8.6'
 
-test:drupal8ci:
+test:drupal8.6ci:
   <<: *test_drupal8ci
   variables:
     IMAGE: drupal8ci:8.6
 
-release:drupal8ci:
+release:drupal8.6ci:
   <<: *release
   variables:
     IMAGE: drupal8ci:8.6
