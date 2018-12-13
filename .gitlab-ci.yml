@@ -52,7 +52,7 @@ variables:
 .test_drupal8ci: &test_drupal8ci
   <<: *CI_REGISTRY_IMAGE
   script:
-    - docker exec test /scripts/run-tests.sh
+    - docker run --rm -t /scripts/run-tests.sh
 
 .release: &release
   stage: release
