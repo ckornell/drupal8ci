@@ -52,6 +52,30 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v eslint)" ]; then
+  printf "Eslint "
+  eslint --version
+else
+  printf "%eslint missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v stylelint)" ]; then
+  printf "Stylelint "
+  stylelint --version
+else
+  printf "%stylelint missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v sass-lint)" ]; then
+  printf "Sass-lint "
+  sass-lint --version
+else
+  printf "%sass-lint missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ -x "$(command -v docker)" ]; then
   docker --version
 else
@@ -59,17 +83,17 @@ else
   __error=1
 fi
 
-if [ -x "$(command -v phpqa)" ]; then
-  phpqa tools
-else
-  printf "%sphpqa missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
 if [ -x "$(command -v phpcs)" ]; then
   phpcs -i
 else
   printf "%phpcs missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v phpqa)" ]; then
+  phpqa tools
+else
+  printf "%sphpqa missing!%s\\n" "${red}" "${end}"
   __error=1
 fi
 

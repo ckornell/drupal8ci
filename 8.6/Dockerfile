@@ -54,6 +54,23 @@ RUN composer global require --no-ansi --no-progress --no-suggest --prefer-dist -
   && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
   && ls -lA /usr/local/bin
 
+# Add some npm tools for lint ci.
+RUN npm -g config set user root \
+  && npm -g config set unsafe-perm true \
+  && npm -g install --no-audit \
+  eslint \
+  eslint-config-airbnb \
+  eslint-plugin-import \
+  eslint-plugin-jsx-a11y \
+  eslint-plugin-react \
+  eslint-plugin-prettier \
+  eslint-config-prettier \
+  prettier \
+  stylelint \
+  stylelint-config-standard \
+  stylelint-no-browser-hacks \
+  git://github.com/sasstools/sass-lint.git#1.13.0
+
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
 
