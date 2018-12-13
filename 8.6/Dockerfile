@@ -48,8 +48,11 @@ RUN composer global install --no-ansi -n --profile \
 ADD https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
 RUN npm -g config set user root \
   && npm -g config set unsafe-perm true \
-  && npm -g install --no-audit /root/package.json \
-  && npm -g install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0
+  && cd /root \
+  && npm install --no-audit \
+  && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
+  && ln -s /root/node_modules/.bin/* /usr/local/bin \
+  && ls -lA /usr/local/bin
 
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
