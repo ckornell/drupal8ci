@@ -34,11 +34,12 @@ RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
   && docker-php-ext-enable imagick xdebug\
   && rm -rf /var/lib/apt/lists/*
 
-# Put a turbo on composer, install phpqa + tools + Robo.
+# Put a turbo on composer, install phpqa + tools + Robo + Coder.
 RUN composer global require hirak/prestissimo \
   && composer global require edgedesign/phpqa --update-no-dev \
-  && composer global require jakub-onderka/php-parallel-lint jakub-onderka/php-console-highlighter \
+  && composer global require drupal/coder jakub-onderka/php-parallel-lint jakub-onderka/php-console-highlighter \
       vimeo/psalm sensiolabs/security-checker \
+  && composer global require dealerdirect/phpcodesniffer-composer-installer \
   && rm -rf ~/.composer/cache/* \
   && curl -fsSL https://robo.li/robo.phar -o robo.phar \
   && chmod +x robo.phar \

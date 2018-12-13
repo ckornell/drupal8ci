@@ -58,6 +58,13 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v phpcs)" ]; then
+  phpcs -i
+else
+  printf "%phpcs missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ $__error = 1 ]; then
   printf "\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
   exit 1
