@@ -42,7 +42,7 @@ variables:
     - sed -i 's#FROM ${RELEASE_USER}#FROM ${CI_REGISTRY_IMAGE}#g' ${DIR}/Dockerfile
   script: *docker_build_push
 
-.CI_REGISTRY_IMAGE: &CI_REGISTRY_IMAGE
+.test_images: &test_images
   stage: test
   before_script:
     - *docker_login_gitlab
@@ -50,9 +50,9 @@ variables:
     - docker run -d -t --name test $CI_REGISTRY_IMAGE/$IMAGE
 
 .test_drupal8ci: &test_drupal8ci
-  <<: *CI_REGISTRY_IMAGE
+  <<: *test_images
   script:
-    - docker run --rm -t /scripts/run-tests.sh
+    - docker exec test /scripts/run-tests.sh
 
 .release: &release
   stage: release
