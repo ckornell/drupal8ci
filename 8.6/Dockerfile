@@ -38,38 +38,18 @@ RUN curl -sL https://download.docker.com/linux/debian/gpg | sudo apt-key add - \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
-RUN composer global require --no-ansi --no-progress --no-suggest --prefer-dist --profile \
-  hirak/prestissimo \
-  && composer global require --update-no-dev --no-ansi --no-progress --no-suggest --prefer-dist --profile \
-  edgedesign/phpqa \
-  && composer global require --no-ansi --no-progress --no-suggest --prefer-dist --profile \
-  consolidation/robo \
-  drupal/coder \
-  jakub-onderka/php-parallel-lint \
-  jakub-onderka/php-console-highlighter \
-  vimeo/psalm sensiolabs/security-checker \
-  && composer global require --no-ansi --no-progress --no-suggest --prefer-dist --profile \
-  dealerdirect/phpcodesniffer-composer-installer \
+COPY composer.json /root/composer.json
+RUN composer global install --no-ansi -n --profile \
   && rm -rf ~/.composer/cache/* \
   && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
   && ls -lA /usr/local/bin
 
-# Add some npm tools for lint ci.
+# Add some npm tools for Drupal 8.6+ with extra sass-lint.
+COPY https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
 RUN npm -g config set user root \
   && npm -g config set unsafe-perm true \
-  && npm -g install --no-audit \
-  eslint \
-  eslint-config-airbnb \
-  eslint-plugin-import \
-  eslint-plugin-jsx-a11y \
-  eslint-plugin-react \
-  eslint-plugin-prettier \
-  eslint-config-prettier \
-  prettier \
-  stylelint \
-  stylelint-config-standard \
-  stylelint-no-browser-hacks \
-  git://github.com/sasstools/sass-lint.git#1.13.0
+  && npm -g install --no-audit /root/package.json \
+  && npm -g install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0
 
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
