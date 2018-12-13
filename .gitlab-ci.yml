@@ -61,7 +61,6 @@ variables:
     - *docker_pull
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
     - docker push $RELEASE_IMAGE/$IMAGE
-    - docker push $RELEASE_IMAGE/drupal8ci:latest
   only:
     - master
 
