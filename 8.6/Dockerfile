@@ -47,7 +47,9 @@ RUN composer global require --no-ansi --no-progress --no-suggest --prefer-dist -
   vimeo/psalm sensiolabs/security-checker \
   && composer global require --no-ansi --no-progress --no-suggest --prefer-dist --profile \
   dealerdirect/phpcodesniffer-composer-installer \
-  && rm -rf ~/.composer/cache/*
+  && rm -rf ~/.composer/cache/* \
+  && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
+  && ls -lA /usr/local/bin
 
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
