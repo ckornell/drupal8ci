@@ -76,13 +76,6 @@ else
   __error=1
 fi
 
-if [ -x "$(command -v docker)" ]; then
-  docker --version
-else
-  printf "%sdocker missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
 if [ -x "$(command -v phpcs)" ]; then
   phpcs -i
 else
