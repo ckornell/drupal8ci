@@ -90,6 +90,27 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v shellcheck)" ]; then
+  shellcheck --version
+else
+  printf "%shellcheck missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v jq)" ]; then
+  jq --version
+else
+  printf "%jq missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v sudo)" ]; then
+  sudo --version
+else
+  printf "%sudo missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ $__error = 1 ]; then
   printf "\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
   exit 1

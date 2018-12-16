@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   apt-transport-https \
   gnupg2 \
   software-properties-common \
+  sudo \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
