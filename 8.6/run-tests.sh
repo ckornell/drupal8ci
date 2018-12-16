@@ -91,7 +91,8 @@ else
 fi
 
 if [ -x "$(command -v shellcheck)" ]; then
-  shellcheck --version
+  printf "Ss=hellcheck "
+  shellcheck --version | grep 'version'
 else
   printf "%shellcheck missing!%s\\n" "${red}" "${end}"
   __error=1
@@ -105,7 +106,7 @@ else
 fi
 
 if [ -x "$(command -v sudo)" ]; then
-  sudo --version
+  sudo --version | grep 'Sudo version'
 else
   printf "%sudo missing!%s\\n" "${red}" "${end}"
   __error=1
