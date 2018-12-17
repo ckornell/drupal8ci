@@ -91,7 +91,7 @@ else
 fi
 
 if [ -x "$(command -v shellcheck)" ]; then
-  printf "Ss=hellcheck "
+  printf "Shellcheck "
   shellcheck --version | grep 'version'
 else
   printf "%shellcheck missing!%s\\n" "${red}" "${end}"
