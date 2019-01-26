@@ -1,6 +1,8 @@
 # https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
-# https://github.com/docker-library/drupal/blob/master/$VER/apache/Dockerfile
+# https://github.com/docker-library/drupal/blob/master/8.6/apache/Dockerfile
 FROM drupal:8.6-apache
+
+LABEL maintainer="dev-drupal.com"
 
 # Install composer.
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer

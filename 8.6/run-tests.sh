@@ -23,6 +23,13 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v composer)" ]; then
+  composer --version
+else
+  printf "%Composer missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ -x "$(command -v mysql)" ]; then
   mysql -V
 else
