@@ -9,7 +9,7 @@
         "vimeo/psalm": "^3.0",
         "sensiolabs/security-checker": "^5.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
-        "phpstan/phpstan": "^0.11.1",
+        "phpstan/phpstan": "^0.10.6",
         "mglaman/phpstan-drupal": "^0.10.2"
     }
 }
