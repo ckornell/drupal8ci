@@ -42,8 +42,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
 COPY composer.json /root/.composer/composer.json
 RUN composer global install --no-ansi -n --profile \
   && rm -rf ~/.composer/cache/* \
-  && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
-  && ls -lA /usr/local/bin
+  && ln -s /root/.composer/vendor/bin/* /usr/local/bin
 
 # Add some npm tools for Drupal 8.6+ with extra sass-lint.
 ADD https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
@@ -52,8 +51,7 @@ RUN npm -g config set user root \
   && cd /root \
   && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
-  && ln -s /root/node_modules/.bin/* /usr/local/bin \
-  && ls -lA /usr/local/bin
+  && ln -s /root/node_modules/.bin/* /usr/local/bin
 
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
