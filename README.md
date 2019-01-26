@@ -25,14 +25,12 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
     - [Phpmd](https://phpmd.org)
     - [Pdepend](https://pdepend.org)
     - [Phpcpd](https://github.com/sebastianbergmann/phpcpd)
-    - [Phpstan](https://github.com/phpstan/phpstan)
-    - [Psalm](https://github.com/vimeo/psalm)
     - [Security-checker](https://github.com/sensiolabs/security-checker)
   - [Drupal Coder](https://www.drupal.org/project/coder)
   - Mariadb (MySQL) client
   - [jq](https://stedolan.github.io/jq/)
   - [Shellcheck](https://www.shellcheck.net)
-  - [Drupal core node tools](https://cgit.drupalcode.org/drupal/plain/core/package.json)
+  - [Drupal core Node tools](https://cgit.drupalcode.org/drupal/plain/core/package.json)
     - [Eslint](https://eslint.org/)
     - [Stylelint](https://github.com/stylelint/stylelint)
     - [Prettier](https://github.com/prettier/prettier)
@@ -43,36 +41,15 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 ### QA examples
 
-From your Drupal root folder (where you have composer.json), as a starting point you an copy from [Gitlab CI dor Drupal 8](https://gitlab.com/mog33/gitlab-ci-drupal/tree/master):
-
-- .phpqa.yml
-- .phpmd.xml
-- .sass-lint.yml
-- .eslintignore
-- phpstan.neon
+From your Drupal root folder (where you have composer.json), as a starting point you an copy config files from [Gitlab CI dor Drupal 8](https://gitlab.com/mog33/gitlab-ci-drupal/tree/master).
 
 ```shell
 docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
   phpqa --report --buildDir reports \
   # Set your custom code folder.
   --analyzedDirs web/modules/custom \
-  # Select any tests
-  --tools phpcs,phpmd,phpcpd,parallel-lint,phploc
-```
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  phpqa --report --buildDir reports --analyzedDirs web/modules/custom --tools pdepend
-```
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  phpqa --report --buildDir reports --analyzedDirs web/modules/custom --tools phpmetrics
-```
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  phpqa --report --buildDir reports --analyzedDirs web/modules/custom --tools phpstan
+  # Select any tests, note some can be long like phpmetrics.
+  --tools phpcs,phpmd,phpcpd,parallel-lint,phploc,pdepend,phpmetrics
 ```
 
 ### Security checker

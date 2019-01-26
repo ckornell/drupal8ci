@@ -24,7 +24,7 @@ else
 fi
 
 if [ -x "$(command -v composer)" ]; then
-  composer --version
+  composer --version | grep version
 else
   printf "%Composer missing!%s\\n" "${red}" "${end}"
   __error=1

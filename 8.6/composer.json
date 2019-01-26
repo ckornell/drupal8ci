@@ -6,10 +6,7 @@
         "drupal/coder": "^8.3",
         "jakub-onderka/php-parallel-lint": "^1.0",
         "jakub-onderka/php-console-highlighter": "^0.4.0",
-        "vimeo/psalm": "^3.0",
         "sensiolabs/security-checker": "^5.0",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
-        "phpstan/phpstan": "^0.10.6",
-        "mglaman/phpstan-drupal": "^0.10.2"
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
     }
 }
