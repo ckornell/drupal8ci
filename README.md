@@ -80,3 +80,14 @@ docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
 docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
   sass-lint --config /.sass-lint.yml --verbose --no-exit --format html --output sass-lint-report.html
 ```
+
+## Ci for a module alone
+
+A variant tag __-with-drupal__ include the Drupal core code for testing a module alone.
+
+```shell
+docker run -it --rm -v $(pwd):/var/www/html/modules/custom mogtofu33/drupal8ci:8.6-with-drupal \
+  phpqa --report --buildDir reports \
+  --analyzedDirs ./ \
+  --tools phpcs,phpmd,phpcpd,parallel-lint,phploc,pdepend,phpmetrics
+```

@@ -1,0 +1,60 @@
+# https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
+# https://github.com/docker-library/drupal/blob/master/8.6/apache/Dockerfile
+FROM drupal:8.6-apache
+
+LABEL maintainer="dev-drupal.com"
+
+# Install composer.
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# Install needed programs for next steps.
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  apt-transport-https \
+  gnupg2 \
+  software-properties-common \
+  sudo \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install Nodejs, Yarn, programs for next steps and php extensions.
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+  && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+  && apt-get update && apt-get install --no-install-recommends -y \
+  nodejs \
+  yarn \
+  imagemagick \
+  libmagickwand-dev \
+  libxslt-dev \
+  mariadb-client \
+  jq \
+  shellcheck \
+  git \
+  unzip \
+  # Install xsl, mysqli, xdebug, imagick.
+  && docker-php-ext-install xsl mysqli \
+  && pecl install imagick xdebug \
+  && docker-php-ext-enable imagick xdebug \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Put a turbo on composer, install phpqa + tools + Robo + Coder.
+COPY composer.json /root/.composer/composer.json
+RUN composer global install --no-ansi -n --profile \
+  && rm -rf ~/.composer/cache/* \
+  && ln -s /root/.composer/vendor/bin/* /usr/local/bin
+
+# Add some npm tools for Drupal 8.6+ with extra sass-lint.
+ADD https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
+RUN npm -g config set user root \
+  && npm -g config set unsafe-perm true \
+  && cd /root \
+  && npm install --no-audit \
+  && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
+  && ln -s /root/node_modules/.bin/* /usr/local/bin
+
+# Remove the memory limit for the CLI only.
+RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
+
+COPY run-tests.sh /scripts/run-tests.sh
+RUN chmod +x /scripts/run-tests.sh

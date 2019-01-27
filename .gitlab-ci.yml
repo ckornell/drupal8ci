@@ -73,18 +73,34 @@ before_script:
   - *docker_login_gitlab
   - *make_build
 
-drupal8.6ci:
+drupal8ci:
   <<: *build_image
   variables:
     IMAGE: drupal8ci:8.6
     DIR: '8.6'
 
-test:drupal8.6ci:
+test:drupal8ci:
   <<: *test_drupal8ci
   variables:
     IMAGE: drupal8ci:8.6
 
-release:drupal8.6ci:
+release:drupal8ci:
   <<: *release
   variables:
-    IMAGE: drupal8ci:8.6
+    IMAGE: drupal8ci:8.6-drupal
+
+drupal8ci-with-drupal:
+  <<: *build_image
+  variables:
+    IMAGE: drupal8ci:8.6-with-drupal
+    DIR: '8.6-with-drupal'
+
+test:drupal8ci-with-drupal:
+  <<: *test_drupal8ci
+  variables:
+    IMAGE: drupal8ci:8.6-with-drupal
+
+release:drupal8ci-with-drupal:
+  <<: *release
+  variables:
+    IMAGE: drupal8ci:8.6-with-drupal
