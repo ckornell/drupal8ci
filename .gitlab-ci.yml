@@ -87,7 +87,7 @@ test:drupal8ci:
 release:drupal8ci:
   <<: *release
   variables:
-    IMAGE: drupal8ci:8.6-drupal
+    IMAGE: drupal8ci:8.6
 
 drupal8ci-with-drupal:
   <<: *build_image
