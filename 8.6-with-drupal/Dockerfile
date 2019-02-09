@@ -44,17 +44,19 @@ RUN composer global install --no-ansi -n --profile \
   && rm -rf ~/.composer/cache/* \
   && ln -s /root/.composer/vendor/bin/* /usr/local/bin
 
-# Add some npm tools for Drupal 8.6+ with extra sass-lint.
-ADD https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
-RUN npm -g config set user root \
-  && npm -g config set unsafe-perm true \
-  && cd /root \
+WORKDIR /var/www/html/core
+RUN cp /var/www/html/core/.env.example /var/www/html/core/.env \
+  && cp /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php \
+  && chmod 777 /var/www/html/sites/default/settings.php \
   && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
-  && ln -s /root/node_modules/.bin/* /usr/local/bin
+  && yarn install \
+  && ln -s /var/www/html/core/node_modules/.bin/* /usr/local/bin
 
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
 
 COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/run-tests.sh
+
+WORKDIR /var/www/html
