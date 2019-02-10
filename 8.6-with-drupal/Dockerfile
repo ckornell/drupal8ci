@@ -45,7 +45,7 @@ RUN composer global install --no-ansi -n --profile \
   && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
   && composer --working-dir="/var/www/html" install \
   && composer --working-dir="/var/www/html" run-script drupal-phpunit-upgrade \
-  && ln -s /var/www/html/vendor/bin/* /usr/local/bin \
+  && ln -s /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
   && rm -rf ~/.composer/cache/*
 
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
