@@ -39,15 +39,20 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
+# Install Drupal dev third party and upgrade Php-unit.
 COPY composer.json /root/.composer/composer.json
 RUN composer global install --no-ansi -n --profile \
-  && rm -rf ~/.composer/cache/* \
-  && ln -s /root/.composer/vendor/bin/* /usr/local/bin
+  && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
+  && composer --working-dir="/var/www/html" install \
+  && composer --working-dir="/var/www/html" run-script drupal-phpunit-upgrade \
+  && rm -rf ~/.composer/cache/*
 
+# Add Drupal 8 Node tools / linters / Sass / Nightwatch.
 WORKDIR /var/www/html/core
 RUN cp /var/www/html/core/.env.example /var/www/html/core/.env \
   && cp /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php \
   && chmod 777 /var/www/html/sites/default/settings.php \
+  && chown www-data:www-data /var/www/html/sites/default/settings.php \
   && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
   && yarn install \
