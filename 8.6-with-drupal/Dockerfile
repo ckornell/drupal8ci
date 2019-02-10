@@ -49,11 +49,8 @@ RUN composer global install --no-ansi -n --profile \
 
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
 WORKDIR /var/www/html/core
-RUN cp /var/www/html/core/.env.example /var/www/html/core/.env \
-  && cp /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php \
-  && chmod 777 /var/www/html/sites/default/settings.php \
-  && chown www-data:www-data /var/www/html/sites/default/settings.php \
-  && npm install --no-audit \
+COPY .env.nightwatch /var/www/html/core/.env
+RUN npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
   && yarn install \
   && ln -s /var/www/html/core/node_modules/.bin/* /usr/local/bin
