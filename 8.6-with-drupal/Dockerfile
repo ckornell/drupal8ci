@@ -48,6 +48,12 @@ RUN composer global install --no-ansi -n --profile \
   && ln -s /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
   && rm -rf ~/.composer/cache/*
 
+# Patch for Nightwatch to install Drupal with a profile.
+# https://www.drupal.org/node/3017176
+RUN curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
+  && git apply -v 3017176-7.patch \
+  && rm -f 3017176-7.patch
+
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
 WORKDIR /var/www/html/core
 COPY .env.nightwatch /var/www/html/core/.env
