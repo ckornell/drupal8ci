@@ -18,4 +18,5 @@ RUN mkdir -p /usr/share/man/man1 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN chmod +x /scripts/start-selenium-standalone.sh
+COPY run-tests.sh /scripts/run-tests.sh
+RUN chmod +x /scripts/*.sh
