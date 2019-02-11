@@ -75,12 +75,12 @@ variables:
     - sed -i 's#FROM ${RELEASE_USER}#FROM ${CI_REGISTRY_IMAGE}#g' ${DIR}/Dockerfile
 
 .test_drupal8ci_variant: &test_drupal8ci_variant
-  stage: test_variant
   <<: *test_drupal8ci
+  stage: test_variant
 
 .release_variant: &release_variant
-  stage: release_variant
   <<: *release
+  stage: release_variant
 
 ################################################################################
 # Jobs based on previous templates.
