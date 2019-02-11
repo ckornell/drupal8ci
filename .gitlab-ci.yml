@@ -89,6 +89,22 @@ release:drupal8ci:
   variables:
     IMAGE: drupal8ci:8.6
 
+drupal8ci-selenium:
+  <<: *build_image
+  variables:
+    IMAGE: drupal8ci:8.6-selenium
+    DIR: '8.6-selenium'
+
+test:drupal8ci-selenium:
+  <<: *test_drupal8ci
+  variables:
+    IMAGE: drupal8ci:8.6-selenium
+
+release:drupal8ci-selenium:
+  <<: *release
+  variables:
+    IMAGE: drupal8ci:8.6-selenium
+
 drupal8ci-with-drupal:
   <<: *build_image
   variables:
@@ -104,3 +120,19 @@ release:drupal8ci-with-drupal:
   <<: *release
   variables:
     IMAGE: drupal8ci:8.6-with-drupal
+
+drupal8ci-with-drupal-selenium:
+  <<: *build_image
+  variables:
+    IMAGE: drupal8ci:8.6-with-drupal-selenium
+    DIR: '8.6-with-drupal-selenium'
+
+test:drupal8ci-with-drupal-selenium:
+  <<: *test_drupal8ci
+  variables:
+    IMAGE: drupal8ci:8.6-with-drupal-selenium
+
+release:drupal8ci-with-drupal-selenium:
+  <<: *release
+  variables:
+    IMAGE: drupal8ci:8.6-with-drupal-selenium
