@@ -1,25 +1,18 @@
 # https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
 # https://github.com/docker-library/drupal/blob/master/8.6/apache/Dockerfile
-FROM mogtofu33/drupal8ci:8.6-no-drupal
+# https://gitlab.com/mog33/drupal8ci
+FROM mogtofu33/drupal8ci:8.6-selenium
 
 LABEL maintainer="dev-drupal.com"
 
-ENV JAVA_OPTS="-Xmx512m"
-ENV SE_OPTS=""
+# Remove the vanilla Drupal project that comes with the parent image.
+RUN rm -rf ..?* .[!.]* *
 
-ADD http://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar selenium-server-standalone.jar
-ADD https://raw.githubusercontent.com/SeleniumHQ/docker-selenium/master/Standalone/start-selenium-standalone.sh /scripts/start-selenium-standalone.sh
+# Fix links for nodes modules and PHPunit in the image.
+RUN rm -f /usr/local/bin/phpunit \
+  && ln -s /root/.composer/vendor/bin/phpunit /usr/local/bin/phpunit \
+  && ln -sf /root/node_modules/.bin /usr/local/bin
 
-RUN mkdir -p /opt/selenium \
-  && mv selenium-server-standalone.jar /opt/selenium/ \
-  && mkdir -p /usr/share/man/man1 \
-  && apt-get update && apt-get install --no-install-recommends -y \
-  chromium \
-  openjdk-8-jdk \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-COPY run-tests.sh /scripts/run-tests.sh
-RUN chmod +x /scripts/*.sh
-
-EXPOSE 80 4444
+# Change docroot since we use Composer Drupal project.
+RUN sed -ri -e 's!/var/www/html!/var/www/html/web!g' /etc/apache2/sites-available/*.conf \
+  && sed -ri -e 's!/var/www!/var/www/html/web!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf

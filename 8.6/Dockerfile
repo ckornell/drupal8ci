@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   gnupg2 \
   software-properties-common \
   sudo \
-  libnss3-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -26,6 +25,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   yarn \
   imagemagick \
   libmagickwand-dev \
+  libnss3-dev \
   libxslt-dev \
   mariadb-client \
   jq \
@@ -39,34 +39,45 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+WORKDIR /root/
+
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 # Install Drupal dev third party and upgrade Php-unit.
 COPY composer.json /root/.composer/composer.json
-RUN composer global install --no-ansi -n --profile \
-  && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
-  && composer --working-dir="/var/www/html" install \
-  && composer --working-dir="/var/www/html" run-script drupal-phpunit-upgrade \
-  && ln -s /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
-  && rm -rf ~/.composer/cache/*
-
-# Patch for Nightwatch to install Drupal with a profile.
-# https://www.drupal.org/node/3017176
-RUN curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
-  && patch -p1 < 3017176-7.patch \
-  && rm -f 3017176-7.patch
+RUN composer global install --no-ansi -n --profile --no-suggest \
+  && ln -sf /root/.composer/vendor/bin/* /usr/local/bin \
+  && composer clear-cache \
+  && rm -rf /root/.composer/cache/*
 
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
-WORKDIR /var/www/html/core
-COPY .env.nightwatch /var/www/html/core/.env
-RUN npm install --no-audit \
+ADD https://raw.githubusercontent.com/drupal/drupal/8.6.x/core/package.json /root/package.json
+RUN npm -g config set user root \
+  && npm -g config set unsafe-perm true \
+  && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
   && yarn install \
-  && ln -s /var/www/html/core/node_modules/.bin/* /usr/local/bin
-
-# Remove the memory limit for the CLI only.
-RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
+  && ln -s /root/node_modules/.bin/* /usr/local/bin \
+  && ln -s /root/node_modules /var/www/html/core/node_modules \
+  && npm cache clean --force \
+  && rm -rf /tmp/*
 
 COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/run-tests.sh
 
+#### Specific part for the included Drupal 8 code in this image.
+COPY .env.nightwatch /var/www/html/core/.env
+
 WORKDIR /var/www/html
+
+#  Install Drupal dev and PHP 7 update for PHPunit, see
+# https://github.com/drupal/drupal/blob/8.6.x/composer.json#L56
+RUN composer install --no-ansi -n --profile --no-suggest \
+  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress --no-ansi \
+  && ln -sf /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
+  # Patch for Nightwatch to install Drupal with a profile.
+  # https://www.drupal.org/node/3017176
+  && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
+  && patch -p1 < 3017176-7.patch \
+  && composer clear-cache \
+  && rm -f 3017176-7.patch \
+  && rm -rf /tmp/*
