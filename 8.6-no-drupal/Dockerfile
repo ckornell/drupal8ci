@@ -11,7 +11,7 @@ RUN npm -g config set user root \
   && cd /root \
   && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
-  && ln -s /root/node_modules/.bin/* /usr/local/bin
+  && ln -sf /root/node_modules/.bin/* /usr/local/bin
 
 # Remove the vanilla Drupal project that comes with this image.
 RUN rm -rf ..?* .[!.]* *
