@@ -120,7 +120,7 @@ else
 fi
 
 if [ -x "$(command -v phpunit)" ]; then
-  phpunit --version
+  phpunit --version | grep 'PHPUnit'
 else
   printf "%phpunit missing!%s\\n" "${red}" "${end}"
   __error=1
@@ -130,6 +130,13 @@ if [ -x "$(command -v nightwatch)" ]; then
   nightwatch --version
 else
   printf "%Nightwatch missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v chromedriver)" ]; then
+  chromedriver --version
+else
+  printf "%chromedriver missing!%s\\n" "${red}" "${end}"
   __error=1
 fi
 

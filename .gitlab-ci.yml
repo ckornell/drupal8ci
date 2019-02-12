@@ -48,12 +48,18 @@ variables:
     - *docker_login_gitlab
     - *make_build
   script: *docker_build_push
+  only:
+    - master
+    - testing
 
 .test_drupal8ci: &test_drupal8ci
   stage: test
   <<: *test_images
   script:
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
+  only:
+    - master
+    - testing
 
 .release: &release
   stage: release
@@ -73,14 +79,24 @@ variables:
     - *docker_login_gitlab
     - *make_build
     - sed -i 's#FROM ${RELEASE_USER}#FROM ${CI_REGISTRY_IMAGE}#g' ${DIR}/Dockerfile
+  only:
+    - master
+    - testing
+    - variant
 
 .test_drupal8ci_variant: &test_drupal8ci_variant
   <<: *test_drupal8ci
   stage: test_variant
+  only:
+    - master
+    - testing
+    - variant
 
 .release_variant: &release_variant
   <<: *release
   stage: release_variant
+  only:
+    - master
 
 ################################################################################
 # Jobs based on previous templates.
@@ -91,66 +107,66 @@ before_script:
   - *docker_login_gitlab
   - *make_build
 
-d8ci:
+ci:
   <<: *build_image
   variables:
     IMAGE: drupal8ci:8.6
     DIR: '8.6'
 
-t:d8ci:
+t:ci:
   <<: *test_drupal8ci
   variables:
     IMAGE: drupal8ci:8.6
 
-r:d8ci:
+r:ci:
   <<: *release
   variables:
     IMAGE: drupal8ci:8.6
 
-d8ci-drupal:
+ci-drupal:
   <<: *build_image
   variables:
     IMAGE: drupal8ci:8.6-with-drupal
     DIR: '8.6-with-drupal'
 
-t:d8ci-drupal:
+t:ci-drupal:
   <<: *test_drupal8ci
   variables:
     IMAGE: drupal8ci:8.6-with-drupal
 
-r:d8ci-drupal:
+r:ci-drupal:
   <<: *release
   variables:
     IMAGE: drupal8ci:8.6-with-drupal
 
-d8ci-selenium:
+ci-selenium:
   <<: *build_variant
   variables:
     IMAGE: drupal8ci:8.6-selenium
     DIR: '8.6-selenium'
 
-t:d8ci-selenium:
+t:ci-selenium:
   <<: *test_drupal8ci_variant
   variables:
     IMAGE: drupal8ci:8.6-selenium
 
-r:d8ci-selenium:
+r:ci-selenium:
   <<: *release_variant
   variables:
     IMAGE: drupal8ci:8.6-selenium
 
-d8ci-drupal-selenium:
+ci-drup-selenium:
   <<: *build_variant
   variables:
     IMAGE: drupal8ci:8.6-with-drupal-selenium
     DIR: '8.6-with-drupal-selenium'
 
-t:d8ci-drupal-selenium:
+t:ci-drup-selenium:
   <<: *test_drupal8ci_variant
   variables:
     IMAGE: drupal8ci:8.6-with-drupal-selenium
 
-r:d8ci-drupal-selenium:
+r:ci-drup-selenium:
   <<: *release_variant
   variables:
     IMAGE: drupal8ci:8.6-with-drupal-selenium
