@@ -5,7 +5,7 @@ FROM mogtofu33/drupal8ci:8.6
 LABEL maintainer="dev-drupal.com"
 
 ENV JAVA_OPTS="-Xmx512m"
-ENV SE_OPTS="-debug"
+ENV SE_OPTS=""
 
 ADD http://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar selenium-server-standalone.jar
 ADD https://raw.githubusercontent.com/SeleniumHQ/docker-selenium/master/Standalone/start-selenium-standalone.sh /scripts/start-selenium-standalone.sh
