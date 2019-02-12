@@ -119,24 +119,17 @@ else
   __error=1
 fi
 
-if [ -x "$(command -v phpunit)" ]; then
-  phpunit --version | grep 'PHPUnit'
+if [ -x "$(command -v java)" ]; then
+  java -version
 else
-  printf "%phpunit missing!%s\\n" "${red}" "${end}"
+  printf "%java missing!%s\\n" "${red}" "${end}"
   __error=1
 fi
 
-if [ -x "$(command -v nightwatch)" ]; then
-  nightwatch --version
+if [ -x "$(command -v chromium)" ]; then
+  chromium --version
 else
-  printf "%Nightwatch missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v chromedriver)" ]; then
-  chromedriver --version
-else
-  printf "%chromedriver missing!%s\\n" "${red}" "${end}"
+  printf "%chromium missing!%s\\n" "${red}" "${end}"
   __error=1
 fi
 

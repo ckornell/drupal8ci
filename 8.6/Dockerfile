@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   gnupg2 \
   software-properties-common \
   sudo \
+  libnss3-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -39,29 +40,33 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
+# Install Drupal dev third party and upgrade Php-unit.
 COPY composer.json /root/.composer/composer.json
 RUN composer global install --no-ansi -n --profile \
-  && rm -rf ~/.composer/cache/* \
-  && ln -s /root/.composer/vendor/bin/* /usr/local/bin
+  && ln -s /root/.composer/vendor/bin/* /usr/local/bin \
+  && composer --working-dir="/var/www/html" install \
+  && composer --working-dir="/var/www/html" run-script drupal-phpunit-upgrade \
+  && ln -s /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
+  && rm -rf ~/.composer/cache/*
 
-# Add some npm tools for Drupal 8.6+ with extra sass-lint.
-ADD https://cgit.drupalcode.org/drupal/plain/core/package.json /root/package.json
-RUN npm -g config set user root \
-  && npm -g config set unsafe-perm true \
-  && cd /root \
-  && npm install --no-audit \
+# Patch for Nightwatch to install Drupal with a profile.
+# https://www.drupal.org/node/3017176
+RUN curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
+  && patch -p1 < 3017176-7.patch \
+  && rm -f 3017176-7.patch
+
+# Add Drupal 8 Node tools / linters / Sass / Nightwatch.
+WORKDIR /var/www/html/core
+COPY .env.nightwatch /var/www/html/core/.env
+RUN npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
-  && ln -s /root/node_modules/.bin/* /usr/local/bin
+  && yarn install \
+  && ln -s /var/www/html/core/node_modules/.bin/* /usr/local/bin
 
 # Remove the memory limit for the CLI only.
 RUN echo 'memory_limit = -1' > /usr/local/etc/php/php-cli.ini
 
-# Remove the vanilla Drupal project that comes with this image.
-RUN rm -rf ..?* .[!.]* *
-
-# Change docroot since we use Composer Drupal project.
-RUN sed -ri -e 's!/var/www/html!/var/www/html/web!g' /etc/apache2/sites-available/*.conf \
-  && sed -ri -e 's!/var/www!/var/www/html/web!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
 COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/run-tests.sh
+
+WORKDIR /var/www/html

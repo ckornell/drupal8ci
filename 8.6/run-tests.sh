@@ -119,6 +119,27 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v phpunit)" ]; then
+  phpunit --version | grep 'PHPUnit'
+else
+  printf "%phpunit missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v nightwatch)" ]; then
+  nightwatch --version
+else
+  printf "%Nightwatch missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v chromedriver)" ]; then
+  chromedriver --version
+else
+  printf "%chromedriver missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ $__error = 1 ]; then
   printf "\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
   exit 1

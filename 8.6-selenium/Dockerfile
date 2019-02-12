@@ -13,7 +13,6 @@ ADD https://raw.githubusercontent.com/SeleniumHQ/docker-selenium/master/Standalo
 RUN mkdir -p /usr/share/man/man1 \
   && apt-get update && apt-get install --no-install-recommends -y \
   chromium \
-  libnss3-dev \
   openjdk-8-jdk \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
