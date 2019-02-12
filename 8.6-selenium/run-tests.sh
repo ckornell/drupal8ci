@@ -120,7 +120,7 @@ else
 fi
 
 if [ -x "$(command -v java)" ]; then
-  java --version
+  java -version
 else
   printf "%java missing!%s\\n" "${red}" "${end}"
   __error=1
