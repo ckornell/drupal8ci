@@ -64,12 +64,15 @@ RUN npm -g config set user root \
 COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/run-tests.sh
 
+# Remove Apache logs to stdout from the php image (used by Drupal inage).
+RUN rm -f /var/log/apache2/access.log
+
 #### Specific part for the included Drupal 8 code in this image.
 COPY .env.nightwatch /var/www/html/core/.env
 
 WORKDIR /var/www/html
 
-#  Install Drupal dev and PHP 7 update for PHPunit, see
+# Install Drupal dev and PHP 7 update for PHPunit, see
 # https://github.com/drupal/drupal/blob/8.6.x/composer.json#L56
 RUN composer install --no-ansi -n --profile --no-suggest \
   && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress --no-ansi \
