@@ -39,55 +39,11 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 ## Basic usage (local)
 
-### QA examples
+The default image `8.6` include Drupal core, a variant `8.6-selenium` include Selenium server with Chromium.
 
-From your Drupal root folder (where you have composer.json), as a starting point you an copy config files from [Gitlab CI dor Drupal 8](https://gitlab.com/mog33/gitlab-ci-drupal/tree/master).
+To use with a local Drupal 8 managed by composer, use `8.6-no-drupal` and `8.6-selenium-no-drupal`.
 
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  phpqa --report --buildDir reports \
-  # Set your custom code folder.
-  --analyzedDirs web/modules/custom \
-  # Select any tests, note some can be long like phpmetrics.
-  --tools phpcs,phpmd,phpcpd,parallel-lint,phploc,pdepend,phpmetrics
-```
+Those images can be used for local tests with Docker, see [Running the jobs locally with Docker](https://gitlab.com/mog33/gitlab-ci-drupal#running-the-jobs-locally-with-docker)
 
-### Security checker
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  security-checker security:check
-```
-
-### Linting examples
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  eslint -f table -c web/core/.eslintrc.passing.json web/modules/custom/**/*.js web/themes/custom/**/*.js
-```
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  stylelint --config-basedir /root/node_modules/ --config web/core/.stylelintrc.json "web/themes/custom/**/css/*.css"
-```
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  stylelint --config-basedir /root/node_modules/ --config web/core/.stylelintrc.json -s scss "web/themes/custom/**/scss/*.scss"
-```
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html mogtofu33/drupal8ci:8.6 \
-  sass-lint --config /.sass-lint.yml --verbose --no-exit --format html --output sass-lint-report.html
-```
-
-## Ci for a module alone
-
-A variant tag __-with-drupal__ include the Drupal core code for testing a module alone.
-
-```shell
-docker run -it --rm -v $(pwd):/var/www/html/modules/custom mogtofu33/drupal8ci:8.6-with-drupal \
-  phpqa --report --buildDir reports \
-  --analyzedDirs ./ \
-  --tools phpcs,phpmd,phpcpd,parallel-lint,phploc,pdepend,phpmetrics
-```
+----
+Want some help implementing this on your project? I provide Drupal 8 expertise as a freelance, just [contact me](https://developpeur-drupal.com/en).
