@@ -54,7 +54,7 @@ ADD https://raw.githubusercontent.com/drupal/drupal/8.6.x/core/package.json /roo
 RUN npm -g config set user root \
   && npm -g config set unsafe-perm true \
   && npm install --no-audit \
-  && npm install --no-audit git://github.com/sasstools/sass-lint.git#1.13.0 \
+  && npm install --no-audit git://github.com/sasstools/sass-lint.git#develop \
   && yarn install \
   && ln -s /root/node_modules/.bin/* /usr/local/bin \
   && ln -s /root/node_modules /var/www/html/core/node_modules \
