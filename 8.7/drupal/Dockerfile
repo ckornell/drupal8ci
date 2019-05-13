@@ -1,6 +1,6 @@
 # https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
-# https://github.com/docker-library/drupal/blob/master/DRUPAL_TAG/apache/Dockerfile
-FROM drupal:DRUPAL_TAG-apache
+# https://github.com/docker-library/drupal/blob/master/8.7/apache/Dockerfile
+FROM drupal:8.7-apache
 
 LABEL maintainer="dev-drupal.com"
 
@@ -50,7 +50,7 @@ RUN composer global install --no-ansi -n --profile --no-suggest \
   && rm -rf /root/.composer/cache/*
 
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
-ADD https://raw.githubusercontent.com/drupal/drupal/DRUPAL_TAG.x/core/package.json /root/package.json
+ADD https://raw.githubusercontent.com/drupal/drupal/8.7.x/core/package.json /root/package.json
 RUN npm -g config set user root \
   && npm -g config set unsafe-perm true \
   && npm install --no-audit \
@@ -73,7 +73,7 @@ COPY .env.nightwatch /var/www/html/core/.env
 WORKDIR /var/www/html
 
 # Install Drupal dev and PHP 7 update for PHPunit, see
-# https://github.com/drupal/drupal/blob/DRUPAL_TAG.x/composer.json#L56
+# https://github.com/drupal/drupal/blob/8.7.x/composer.json#L56
 RUN composer install --no-ansi -n --profile --no-suggest \
   && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress --no-ansi \
   && ln -sf /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
