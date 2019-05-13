@@ -11,7 +11,7 @@ define docker_tests
 	docker run --rm -t $(1) /scripts/run-tests.sh
 endef
 
-define file_build
+define file_prepare
 	@cp -r ./8.x/ ./$(1)/;
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
@@ -23,38 +23,32 @@ define file_build
 	@rm -f "./$(1)/selenium-no-drupal/Dockerfile.tpl";
 endef
 
-define clean_build
+define clean_prepare
 	@rm -rf ./$(1)/;
 endef
 
-build: clean_build file_build
+prepare: clean_prepare file_prepare
 
-file_build:
-	$(call file_build,8.6)
-	# $(call file_build,8.7)
+file_prepare:
+	$(call file_prepare,8.6)
 
-clean_build:
-	$(call clean_build,8.6)
-	# $(call clean_build,8.7)
+clean_prepare:
+	$(call clean_prepare,8.6)
 
-test: clean-containers run run_tests
+test: clean-containers build build_tests
 
-run:
+build:
 	$(call docker_build,drupal8ci_8_6,./8.6/drupal)
-	# $(call docker_build,drupal8ci_8_7,./8.7/drupal)
 
-run_tests:
+build_tests:
 	$(call docker_tests,drupal8ci_8_6)
-	# $(call docker_tests,drupal8ci_8_7)
 
 clean: clean-containers clean-images
 
 clean-containers:
 	$(call docker_clean,drupal8ci_8_6)
-	# $(call docker_clean,drupal8ci_8_7)
 
 clean-images:
 	-docker rmi drupal8ci_8_6;
-	# -docker rmi drupal8ci_8_7;
 
-.PHONY: test clean build run
+.PHONY: test clean prepare build run
