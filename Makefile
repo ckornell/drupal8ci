@@ -31,30 +31,30 @@ build: clean_build file_build
 
 file_build:
 	$(call file_build,8.6)
-	$(call file_build,8.7)
+	# $(call file_build,8.7)
 
 clean_build:
 	$(call clean_build,8.6)
-	$(call clean_build,8.7)
+	# $(call clean_build,8.7)
 
 test: clean-containers run run_tests
 
 run:
 	$(call docker_build,drupal8ci_8_6,./8.6/drupal)
-	$(call docker_build,drupal8ci_8_7,./8.7/drupal)
+	# $(call docker_build,drupal8ci_8_7,./8.7/drupal)
 
 run_tests:
 	$(call docker_tests,drupal8ci_8_6)
-	$(call docker_tests,drupal8ci_8_7)
+	# $(call docker_tests,drupal8ci_8_7)
 
 clean: clean-containers clean-images
 
 clean-containers:
 	$(call docker_clean,drupal8ci_8_6)
-	$(call docker_clean,drupal8ci_8_7)
+	# $(call docker_clean,drupal8ci_8_7)
 
 clean-images:
 	-docker rmi drupal8ci_8_6;
-	-docker rmi drupal8ci_8_7;
+	# -docker rmi drupal8ci_8_7;
 
 .PHONY: test clean build run
