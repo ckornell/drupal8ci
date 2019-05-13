@@ -81,12 +81,14 @@ before_script:
   - *docker_login_gitlab
   - *make_build
 
+# Drupal 8.6
+
 ci:
   <<: *build_image
   stage: build
   variables:
     IMAGE: drupal8ci:8.6
-    DIR: '8.6'
+    DIR: '8.6/drupal'
 
 t:ci:
   <<: *test_drupal8ci
@@ -105,7 +107,7 @@ no-drupal:
   stage: build variant
   variables:
     IMAGE: drupal8ci:8.6-no-drupal
-    DIR: '8.6-no-drupal'
+    DIR: '8.6/no-drupal'
 
 t:no-drupal:
   <<: *test_drupal8ci
@@ -124,7 +126,7 @@ selenium:
   stage: build variant
   variables:
     IMAGE: drupal8ci:8.6-selenium
-    DIR: '8.6-selenium'
+    DIR: '8.6/selenium'
 
 t:selenium:
   <<: *test_drupal8ci
@@ -143,7 +145,7 @@ selenium-no-drupal:
   stage: build variant no drupal
   variables:
     IMAGE: drupal8ci:8.6-selenium-no-drupal
-    DIR: '8.6-selenium-no-drupal'
+    DIR: '8.6/selenium-no-drupal'
 
 t:selenium-no-drupal:
   <<: *test_drupal8ci
@@ -156,3 +158,81 @@ r:selenium-no-drupal:
   stage: release variant no drupal
   variables:
     IMAGE: drupal8ci:8.6-selenium-no-drupal
+
+# Drupal 8.7
+
+ci:
+  <<: *build_image
+  stage: build
+  variables:
+    IMAGE: drupal8ci:8.7
+    DIR: '8.7/drupal'
+
+t:ci:
+  <<: *test_drupal8ci
+  stage: test
+  variables:
+    IMAGE: drupal8ci:8.7
+
+r:ci:
+  <<: *release
+  stage: release
+  variables:
+    IMAGE: drupal8ci:8.7
+
+no-drupal:
+  <<: *build_image
+  stage: build variant
+  variables:
+    IMAGE: drupal8ci:8.7-no-drupal
+    DIR: '8.7/no-drupal'
+
+t:no-drupal:
+  <<: *test_drupal8ci
+  stage: test variant
+  variables:
+    IMAGE: drupal8ci:8.7-no-drupal
+
+r:no-drupal:
+  <<: *release
+  stage: release variant
+  variables:
+    IMAGE: drupal8ci:8.7-no-drupal
+
+selenium:
+  <<: *build_image
+  stage: build variant
+  variables:
+    IMAGE: drupal8ci:8.7-selenium
+    DIR: '8.7/selenium'
+
+t:selenium:
+  <<: *test_drupal8ci
+  stage: test variant
+  variables:
+    IMAGE: drupal8ci:8.7-selenium
+
+r:selenium:
+  <<: *release
+  stage: release variant
+  variables:
+    IMAGE: drupal8ci:8.7-selenium
+
+selenium-no-drupal:
+  <<: *build_image
+  stage: build variant no drupal
+  variables:
+    IMAGE: drupal8ci:8.7-selenium-no-drupal
+    DIR: '8.7/selenium-no-drupal'
+
+t:selenium-no-drupal:
+  <<: *test_drupal8ci
+  stage: test variant no drupal
+  variables:
+    IMAGE: drupal8ci:8.7-selenium-no-drupal
+
+r:selenium-no-drupal:
+  <<: *release
+  stage: release variant no drupal
+  variables:
+    IMAGE: drupal8ci:8.7-selenium-no-drupal
