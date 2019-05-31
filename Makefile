@@ -31,24 +31,30 @@ prepare: clean_prepare file_prepare
 
 file_prepare:
 	$(call file_prepare,8.6)
+	$(call file_prepare,8.7)
 
 clean_prepare:
 	$(call clean_prepare,8.6)
+	$(call clean_prepare,8.7)
 
 test: clean-containers build build_tests
 
 build:
 	$(call docker_build,drupal8ci_8_6,./8.6/drupal)
+	$(call docker_build,drupal8ci_8_7,./8.7/drupal)
 
 build_tests:
 	$(call docker_tests,drupal8ci_8_6)
+	$(call docker_tests,drupal8ci_8_7)
 
 clean: clean-containers clean-images
 
 clean-containers:
 	$(call docker_clean,drupal8ci_8_6)
+	$(call docker_clean,drupal8ci_8_7)
 
 clean-images:
 	-docker rmi drupal8ci_8_6;
+	-docker rmi drupal8ci_8_7;
 
 .PHONY: test clean prepare build run
