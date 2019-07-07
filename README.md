@@ -39,9 +39,9 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 ## Basic usage (local)
 
-The default image `8.6` include Drupal core, a variant `8.6-selenium` include Selenium server with Chromium.
+The default image `8.7` include Drupal core, a variant `8.7-selenium` include Selenium server with Chromium.
 
-To use with a local Drupal 8 managed by composer, use `8.6-no-drupal` and `8.6-selenium-no-drupal`.
+To use with a local Drupal 8 managed by composer, use `8.7-no-drupal` and `8.7-selenium-no-drupal`.
 
 Those images can be used for local tests with Docker, see [Running the jobs locally with Docker](https://gitlab.com/mog33/gitlab-ci-drupal#running-the-jobs-locally-with-docker)
 
