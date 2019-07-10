@@ -1,7 +1,7 @@
 {
     "require": {
         "hirak/prestissimo": "^0.3.8",
-        "edgedesign/phpqa": "^1.20",
+        "edgedesign/phpqa": "^1.21",
         "consolidation/robo": "^1.3",
         "boedah/robo-drush": "^4.2",
         "drupal/coder": "^8.3",
