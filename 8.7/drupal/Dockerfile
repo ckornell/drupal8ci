@@ -46,6 +46,7 @@ WORKDIR /root/
 COPY composer.json /root/.composer/composer.json
 RUN composer global install --no-ansi -n --profile --no-suggest \
   && ln -sf /root/.composer/vendor/bin/* /usr/local/bin \
+  && mkdir -p /var/www/html/vendor/bin/ \
   && ln -sf /root/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   && composer clear-cache \
   && rm -rf /root/.composer/cache/*
