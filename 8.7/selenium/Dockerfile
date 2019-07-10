@@ -23,4 +23,4 @@ RUN mkdir -p /opt/selenium \
 COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/*.sh
 
-EXPOSE 80 4444
+EXPOSE 80 4444 9515
