@@ -15,12 +15,12 @@ define file_prepare
 	@cp -r ./8.x/ ./$(1)/;
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
-	@rm -f "./$(1)/no-drupal/Dockerfile.tpl";
+	# @DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
+	# @rm -f "./$(1)/no-drupal/Dockerfile.tpl";
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium/Dockerfile.tpl" > "./$(1)/selenium/Dockerfile";
 	@rm -f "./$(1)/selenium/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium-no-drupal/Dockerfile.tpl" > "./$(1)/selenium-no-drupal/Dockerfile";
-	@rm -f "./$(1)/selenium-no-drupal/Dockerfile.tpl";
+	# @DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium-no-drupal/Dockerfile.tpl" > "./$(1)/selenium-no-drupal/Dockerfile";
+	# @rm -f "./$(1)/selenium-no-drupal/Dockerfile.tpl";
 endef
 
 define clean_prepare
