@@ -39,27 +39,30 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-WORKDIR /root/
+RUN mkdir /var/www/.composer /var/www/.node \
+  && chmod 777 /var/www
+
+WORKDIR /var/www/.composer
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 # Install Drupal dev third party and upgrade Php-unit.
-COPY composer.json /root/.composer/composer.json
-RUN composer global install --no-ansi -n --profile --no-suggest \
-  && ln -sf /root/.composer/vendor/bin/* /usr/local/bin \
+COPY composer.json /var/www/.composer/composer.json
+RUN composer install --no-ansi -n --profile --no-suggest \
+  && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
   && mkdir -p /var/www/html/vendor/bin/ \
-  && ln -sf /root/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
+  && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   && composer clear-cache \
-  && rm -rf /root/.composer/cache/*
+  && rm -rf /var/www/.composer/cache/*
 
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
-ADD https://raw.githubusercontent.com/drupal/drupal/$DRUPAL_TAG.x/core/package.json /root/package.json
-RUN npm -g config set user root \
-  && npm -g config set unsafe-perm true \
+WORKDIR /var/www/.node
+
+RUN cp /var/www/html/core/package.json /var/www/.node \
   && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#develop \
   && yarn install \
-  && ln -s /root/node_modules/.bin/* /usr/local/bin \
-  && ln -s /root/node_modules /var/www/html/core/node_modules \
+  && ln -s /var/www/.node/node_modules/.bin/* /usr/local/bin \
+  && ln -s /var/www/.node/node_modules /var/www/html/core/node_modules \
   && npm cache clean --force \
   && rm -rf /tmp/*
 
@@ -67,21 +70,17 @@ COPY run-tests.sh /scripts/run-tests.sh
 RUN chmod +x /scripts/run-tests.sh
 
 # Remove Apache logs to stdout from the php image (used by Drupal inage).
-RUN rm -f /var/log/apache2/access.log
+RUN rm -f /var/log/apache2/access.log \
+  && chown -R www-data:www-data /var/www/.composer /var/www/.node
 
 #### Specific part for the included Drupal 8 code in this image.
 COPY .env.nightwatch /var/www/html/core/.env
 
 WORKDIR /var/www/html
 
-# Install Drupal dev and PHP 7 update for PHPunit, see
-# https://github.com/drupal/drupal/blob/$DRUPAL_TAG.x/composer.json#L56
-RUN composer install --no-ansi -n --profile --no-suggest \
-  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress --no-ansi \
-  && ln -sf /var/www/html/vendor/bin/phpunit /usr/local/bin/phpunit \
-  # Patch for Nightwatch to install Drupal with a profile.
-  # https://www.drupal.org/node/3017176
-  && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
+# Patch for Nightwatch to install Drupal with a profile.
+# https://www.drupal.org/node/3017176
+RUN  curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
   && patch -p1 < 3017176-7.patch \
   && composer clear-cache \
   && rm -f 3017176-7.patch \

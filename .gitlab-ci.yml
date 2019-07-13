@@ -100,24 +100,24 @@ r:ci:
   variables:
     IMAGE: drupal8ci:8.7
 
-# no-drupal:
-#   <<: *build_image
-#   stage: build variant
-#   variables:
-#     IMAGE: drupal8ci:8.7-no-drupal
-#     DIR: '8.7/no-drupal'
+no-drupal:
+  <<: *build_image
+  stage: build variant
+  variables:
+    IMAGE: drupal8ci:8.7-no-drupal
+    DIR: '8.7/no-drupal'
 
-# t:no-drupal:
-#   <<: *test_drupal8ci
-#   stage: test variant
-#   variables:
-#     IMAGE: drupal8ci:8.7-no-drupal
+t:no-drupal:
+  <<: *test_drupal8ci
+  stage: test variant
+  variables:
+    IMAGE: drupal8ci:8.7-no-drupal
 
-# r:no-drupal:
-#   <<: *release
-#   stage: release variant
-#   variables:
-#     IMAGE: drupal8ci:8.7-no-drupal
+r:no-drupal:
+  <<: *release
+  stage: release variant
+  variables:
+    IMAGE: drupal8ci:8.7-no-drupal
 
 selenium:
   <<: *build_image
@@ -138,21 +138,21 @@ r:selenium:
   variables:
     IMAGE: drupal8ci:8.7-selenium
 
-# selenium-no-drupal:
-#   <<: *build_image
-#   stage: build variant no drupal
-#   variables:
-#     IMAGE: drupal8ci:8.7-selenium-no-drupal
-#     DIR: '8.7/selenium-no-drupal'
+selenium-no-drupal:
+  <<: *build_image
+  stage: build variant no drupal
+  variables:
+    IMAGE: drupal8ci:8.7-selenium-no-drupal
+    DIR: '8.7/selenium-no-drupal'
 
-# t:selenium-no-drupal:
-#   <<: *test_drupal8ci
-#   stage: test variant no drupal
-#   variables:
-#     IMAGE: drupal8ci:8.7-selenium-no-drupal
+t:selenium-no-drupal:
+  <<: *test_drupal8ci
+  stage: test variant no drupal
+  variables:
+    IMAGE: drupal8ci:8.7-selenium-no-drupal
 
-# r:selenium-no-drupal:
-#   <<: *release
-#   stage: release variant no drupal
-#   variables:
-#     IMAGE: drupal8ci:8.7-selenium-no-drupal
+r:selenium-no-drupal:
+  <<: *release
+  stage: release variant no drupal
+  variables:
+    IMAGE: drupal8ci:8.7-selenium-no-drupal
