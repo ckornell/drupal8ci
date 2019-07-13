@@ -31,6 +31,9 @@ variables:
 .docker_pull:
   - &docker_pull docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
 
+.docker_pull_base:
+  - &docker_pull_base docker pull $IMAGE_BASE || true
+
 .docker_build_push:
   script: &docker_build_push
     - *docker_pull
@@ -49,6 +52,7 @@ variables:
   before_script:
     - *docker_login_gitlab
     - *make_build
+    - *docker_pull_base
   script: *docker_build_push
   only:
     - master
@@ -87,6 +91,7 @@ ci:
   variables:
     IMAGE: drupal8ci:8.7
     DIR: '8.7/drupal'
+    IMAGE_BASE: drupal:8.7-apache
 
 t:ci:
   <<: *test_drupal8ci
@@ -106,6 +111,7 @@ no-drupal:
   variables:
     IMAGE: drupal8ci:8.7-no-drupal
     DIR: '8.7/no-drupal'
+    IMAGE_BASE: mogtofu33/drupal8ci:8.7
 
 t:no-drupal:
   <<: *test_drupal8ci
@@ -125,6 +131,7 @@ selenium:
   variables:
     IMAGE: drupal8ci:8.7-selenium
     DIR: '8.7/selenium'
+    IMAGE_BASE: mogtofu33/drupal8ci:8.7
 
 t:selenium:
   <<: *test_drupal8ci
@@ -144,6 +151,7 @@ selenium-no-drupal:
   variables:
     IMAGE: drupal8ci:8.7-selenium-no-drupal
     DIR: '8.7/selenium-no-drupal'
+    IMAGE_BASE: mogtofu33/drupal8ci:8.7-selenium
 
 t:selenium-no-drupal:
   <<: *test_drupal8ci
