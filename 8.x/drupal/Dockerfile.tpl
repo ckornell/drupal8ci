@@ -78,9 +78,12 @@ COPY .env.nightwatch /var/www/html/core/.env
 
 WORKDIR /var/www/html
 
-# Patch for Nightwatch to install Drupal with a profile.
-# https://www.drupal.org/node/3017176
-RUN  curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
+# Install Drupal dev and PHP 7 update for PHPunit, see
+# https://github.com/drupal/drupal/blob/8.7.x/composer.json#L56
+RUN composer run-script drupal-phpunit-upgrade --no-ansi \
+  # Patch for Nightwatch to install Drupal with a profile.
+  # https://www.drupal.org/node/3017176
+  && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
   && patch -p1 < 3017176-7.patch \
   && composer clear-cache \
   && rm -f 3017176-7.patch \
