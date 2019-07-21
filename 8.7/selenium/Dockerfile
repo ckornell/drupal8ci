@@ -16,7 +16,6 @@ RUN mkdir -p /opt/selenium \
   && mv selenium-server-standalone.jar /opt/selenium/ \
   && mkdir -p /usr/share/man/man1 \
   && apt-get update && apt-get install --no-install-recommends -y \
-  chromium \
   openjdk-8-jdk \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

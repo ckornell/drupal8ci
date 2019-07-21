@@ -23,6 +23,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get update && apt-get install --no-install-recommends -y \
   nodejs \
   yarn \
+  chromium \
   imagemagick \
   libmagickwand-dev \
   libnss3-dev \
@@ -32,6 +33,8 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   shellcheck \
   git \
   unzip \
+  && curl -fsSL https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64 -o /usr/local/bin/yq \
+  && chmod +x /usr/local/bin/yq \
   # Install xsl, mysqli, xdebug, imagick.
   && docker-php-ext-install xsl mysqli \
   && pecl install imagick xdebug \
