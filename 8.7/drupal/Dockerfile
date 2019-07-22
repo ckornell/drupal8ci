@@ -58,7 +58,7 @@ RUN composer install --no-ansi -n --profile --no-suggest \
   && rm -rf /var/www/.composer/cache/*
 
 # [TEMPORARY] Patch nightwatch for upgrade and profile install support.
-WORKDIR /var/www/html/core/
+WORKDIR /var/www/html/
 
 RUN curl -fsSL https://www.drupal.org/files/issues/2019-07-02/3059356-12-nightwatch-upgrade.patch -o 3059356-12-nightwatch-upgrade.patch \
   && patch -p1 < 3059356-12-nightwatch-upgrade.patch \
