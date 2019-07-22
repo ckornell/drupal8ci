@@ -57,6 +57,19 @@ RUN composer install --no-ansi -n --profile --no-suggest \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*
 
+# [TEMPORARY] Patch nightwatch for upgrade and profile install support.
+WORKDIR /var/www/html/core/
+
+RUN curl -fsSL https://www.drupal.org/files/issues/2019-07-02/3059356-12-nightwatch-upgrade.patch -o 3059356-12-nightwatch-upgrade.patch \
+  && patch -p1 < 3059356-12-nightwatch-upgrade.patch \
+  # Patch for Nightwatch to install Drupal with a profile.
+  && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
+  && patch -p1 < 3017176-7.patch \
+  && rm -f 3059356-12-nightwatch-upgrade.patch \
+  && rm -f 3017176-7.patch
+
+COPY nightwatch.conf.js /var/www/html/core/nightwatch.conf.js
+
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
 WORKDIR /var/www/.node
 
@@ -78,7 +91,7 @@ RUN rm -f /var/log/apache2/access.log \
   && chown -R www-data:www-data /var/www/.composer /var/www/.node
 
 # Fix Php performances.
-RUN mv /usr/local/etc/php/hp.ini-development /usr/local/etc/php/php.ini \
+RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini \
   && sed -i "s#memory_limit = 128M#memory_limit = 512M#g" /usr/local/etc/php/php.ini \
   && sed -i "s#max_execution_time = 30#max_execution_time = 90#g" /usr/local/etc/php/php.ini \
   && sed -i "s#;max_input_nesting_level = 64#max_input_nesting_level = 512#g" /usr/local/etc/php/php.ini
@@ -91,16 +104,6 @@ WORKDIR /var/www/html
 # Install Drupal dev and PHP 7 update for PHPunit, see
 # https://github.com/drupal/drupal/blob/8.7.x/composer.json#L56
 RUN composer run-script drupal-phpunit-upgrade --no-ansi \
-  # Patching nightwatch to upgrade to ^1.10
-  && curl -fsSL https://www.drupal.org/files/issues/2019-07-02/3059356-12-nightwatch-upgrade.patch -o 3059356-12-nightwatch-upgrade.patch \
-  && patch -p1 < 3059356-12-nightwatch-upgrade.patch \
-  && yarn install \
-  # Patch for Nightwatch to install Drupal with a profile.
-  # https://www.drupal.org/node/3017176
-  && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
-  && patch -p1 < 3017176-7.patch \
   && composer clear-cache \
-  && rm -f 3059356-12-nightwatch-upgrade.patch \
-  && rm -f 3017176-7.patch \
   && npm cache clean --force \
   && rm -rf /tmp/*
