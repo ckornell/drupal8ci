@@ -20,9 +20,7 @@ RUN mkdir -p /opt/selenium \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY start-chrome.sh /scripts/start-chrome.sh
-
-COPY run-tests.sh /scripts/run-tests.sh
+COPY run-tests-extra.sh /scripts/run-tests-extra.sh
 RUN chmod +x /scripts/*.sh
 
 EXPOSE 80 4444 9515 9222
