@@ -112,6 +112,13 @@ else
   __error=1
 fi
 
+if [ -x "$(command -v yq)" ]; then
+  yq --version
+else
+  printf "%yq missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
 if [ -x "$(command -v sudo)" ]; then
   sudo --version | grep 'Sudo version'
 else
@@ -138,6 +145,17 @@ if [ -x "$(command -v chromedriver)" ]; then
 else
   printf "%chromedriver missing!%s\\n" "${red}" "${end}"
   __error=1
+fi
+
+if [ -x "$(command -v chromium)" ]; then
+  chromium --version
+else
+  printf "%chromium missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -f ./run-tests-extra.sh ]; then
+  source ./run-tests-extra.sh
 fi
 
 if [ $__error = 1 ]; then
