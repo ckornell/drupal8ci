@@ -60,12 +60,12 @@ RUN composer install --no-ansi -n --profile --no-suggest \
 # [TEMPORARY] Patch nightwatch for upgrade and profile install support.
 WORKDIR /var/www/html/
 
-RUN curl -fsSL https://www.drupal.org/files/issues/2019-07-02/3059356-12-nightwatch-upgrade.patch -o 3059356-12-nightwatch-upgrade.patch \
-  && patch -p1 < 3059356-12-nightwatch-upgrade.patch \
+RUN curl -fsSL https://www.drupal.org/files/issues/2019-08-12/3059356-21.patch -o 3059356-21.patch \
+  && patch -p1 < 3059356-21.patch \
   # Patch for Nightwatch to install Drupal with a profile.
   && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
   && patch -p1 < 3017176-7.patch \
-  && rm -f 3059356-12-nightwatch-upgrade.patch \
+  && rm -f 3059356-21.patch \
   && rm -f 3017176-7.patch
 
 COPY nightwatch.conf.js /var/www/html/core/nightwatch.conf.js
