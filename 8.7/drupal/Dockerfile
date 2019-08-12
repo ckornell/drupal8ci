@@ -23,7 +23,6 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get update && apt-get install --no-install-recommends -y \
   nodejs \
   yarn \
-  chromium \
   imagemagick \
   libmagickwand-dev \
   libnss3-dev \
@@ -44,6 +43,15 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
 
 RUN mkdir /var/www/.composer /var/www/.node \
   && chmod 777 /var/www
+
+# Install Chromium 76 on debian.
+
+COPY 99defaultrelease /etc/apt/apt.conf.d/99defaultrelease
+COPY sources.list /etc/apt/sources.list.d/sources.list
+
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak \
+  && apt-get update && apt-get -t testing install --no-install-recommends -y \
+  chromium
 
 WORKDIR /var/www/.composer
 
@@ -86,7 +94,7 @@ COPY run-tests.sh /scripts/run-tests.sh
 COPY start-chrome.sh /scripts/start-chrome.sh
 RUN chmod +x /scripts/*.sh
 
-# Remove Apache logs to stdout from the php image (used by Drupal inage).
+# Remove Apache logs to stdout from the php image (used by Drupal image).
 RUN rm -f /var/log/apache2/access.log \
   && chown -R www-data:www-data /var/www/.composer /var/www/.node
 
