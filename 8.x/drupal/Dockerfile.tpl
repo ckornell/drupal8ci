@@ -72,12 +72,12 @@ WORKDIR /var/www/html/
 RUN curl -fsSL https://git.drupalcode.org/project/drupal/raw/155c2d435c76eb90a1afe102daad5335a57661c6/core/yarn.lock -o yarn_8-8.lock \
   && cp yarn_8-8.lock core/yarn.lock \
   # Patch for Nightwatch upgrade.
-  && curl -fsSL https://www.drupal.org/files/issues/2019-08-14/3059356-25.patch -o 3059356-25.patch \
-  && patch -p1 < 3059356-25.patch \
+  && curl -fsSL https://www.drupal.org/files/issues/2019-08-14/3059356-27.patch -o 3059356-27.patch \
+  && patch -p1 < 3059356-27.patch \
   # Patch for Nightwatch to install Drupal with a profile.
   && curl -fsSL https://www.drupal.org/files/issues/2019-02-05/3017176-7.patch -o 3017176-7.patch \
   && patch -p1 < 3017176-7.patch \
-  && rm -f 3059356-25.patch 3017176-7.patch yarn_8-8.lock
+  && rm -f 3059356-27.patch 3017176-7.patch yarn_8-8.lock
 
 # Add Drupal 8 Node tools / linters / Sass / Nightwatch.
 WORKDIR /var/www/.node
