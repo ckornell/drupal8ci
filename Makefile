@@ -1,5 +1,5 @@
 define docker_build
-	docker build -t=$(1) $(2);
+	docker build --compress --tag $(1) $(2);
 endef
 
 define docker_clean
@@ -9,6 +9,18 @@ endef
 
 define docker_tests
 	docker run --rm -t $(1) /scripts/run-tests.sh
+endef
+
+define push_gitlab
+	docker logout
+	docker login -u mog33 registry.gitlab.com
+	docker tag $(1) registry.gitlab.com/mog33/drupal8ci/drupal8ci:$(2)
+	docker push registry.gitlab.com/mog33/drupal8ci/drupal8ci:$(2)
+endef
+
+define push_docker
+	docker tag $(1) mogtofu33/drupal8ci:$(2)
+	docker push mogtofu33/drupal8ci:$(2)
 endef
 
 define file_prepare
@@ -49,20 +61,49 @@ test: clean-containers build build_tests
 
 build:
 	$(call docker_build,drupal8ci_8_7,./8.7/drupal)
+	$(call docker_build,drupal8ci_8_7-no-drupal,./8.7/no-drupal)
+	$(call docker_build,drupal8ci_8_7-selenium,./8.7/selenium)
+	$(call docker_build,drupal8ci_8_7-selenium-no-drupal,./8.7/selenium-no-drupal)
 	$(call docker_build,drupal8ci_8_8-dev,./8.8.x-dev/drupal)
+	$(call docker_build,drupal8ci_8_8-dev-selenium,./8.8.x-dev/selenium)
 
 build_tests:
 	$(call docker_tests,drupal8ci_8_7)
+	$(call docker_tests,drupal8ci_8_7-no-drupal)
+	$(call docker_tests,drupal8ci_8_7-selenium)
+	$(call docker_tests,drupal8ci_8_7-selenium-no-drupal)
 	$(call docker_tests,drupal8ci_8_8-dev)
+	$(call docker_tests,drupal8ci_8_8-dev-selenium)
+
+push:
+	docker logout
+	docker login -u mogtofu33
+	$(call push_docker,drupal8ci_8_7,8.7)
+	$(call push_docker,drupal8ci_8_7-no-drupal,8.7-no-drupal)
+	$(call push_docker,drupal8ci_8_7-selenium,8.7-selenium)
+	$(call push_docker,drupal8ci_8_7-selenium-no-drupal,8.7-selenium-no-drupal)
+	$(call push_docker,drupal8ci_8_8-dev,8.8-dev)
+	$(call push_docker,drupal8ci_8_8-dev-selenium,8.8-dev-selenium)
+	docker logout
+
+release: clean build build_tests push
 
 clean: clean-containers clean-images
 
 clean-containers:
 	$(call docker_clean,drupal8ci_8_7)
+	$(call docker_clean,drupal8ci_8_7-no-drupal)
+	$(call docker_clean,drupal8ci_8_7-selenium)
+	$(call docker_clean,drupal8ci_8_7-selenium-no-drupal)
 	$(call docker_clean,drupal8ci_8_8-dev)
+	$(call docker_clean,drupal8ci_8_8-dev-selenium)
 
 clean-images:
 	-docker rmi drupal8ci_8_7;
+	-docker rmi drupal8ci_8_7-no-drupal;
+	-docker rmi drupal8ci_8_7-selenium;
+	-docker rmi drupal8ci_8_7-selenium-no-drupal;
 	-docker rmi drupal8ci_8_8-dev;
+	-docker rmi drupal8ci_8_8-dev-selenium;
 
-.PHONY: test clean prepare build run
+.PHONY: test clean prepare build run push release
