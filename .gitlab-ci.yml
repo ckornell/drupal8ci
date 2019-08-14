@@ -10,6 +10,9 @@ stages:
   - build variant
   - test variant
   - release variant
+  - build variant dev
+  - test variant dev
+  - release variant dev
   - build variant no drupal
   - test variant no drupal
   - release variant no drupal
@@ -144,6 +147,46 @@ r:selenium:
   stage: release variant
   variables:
     IMAGE: drupal8ci:8.7-selenium
+
+dev:
+  <<: *build_image
+  stage: build variant dev
+  variables:
+    IMAGE: drupal8ci:8.8.x-dev
+    DIR: '8.8.x-dev/drupal'
+    IMAGE_BASE: mogtofu33/drupal8ci:8.7
+
+t:dev:
+  <<: *test_drupal8ci
+  stage: test variant dev
+  variables:
+    IMAGE: drupal8ci:8.8.x-dev
+
+r:dev:
+  <<: *release
+  stage: release variant dev
+  variables:
+    IMAGE: drupal8ci:8.8.x-dev
+
+dev-selenium:
+  <<: *build_image
+  stage: build variant dev
+  variables:
+    IMAGE: drupal8ci:8.8.x-dev-selenium
+    DIR: '8.8.x-dev/selenium'
+    IMAGE_BASE: mogtofu33/drupal8ci:8.7-selenium
+
+t:dev-selenium:
+  <<: *test_drupal8ci
+  stage: test variant dev
+  variables:
+    IMAGE: drupal8ci:8.8.x-dev-selenium
+
+r:dev-selenium:
+  <<: *release
+  stage: release variant dev
+  variables:
+    IMAGE: drupal8ci:8.8.x-dev-selenium
 
 selenium-no-drupal:
   <<: *build_image
