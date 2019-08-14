@@ -1,4 +1,9 @@
 {
+    "name": "mog33/drupal8ci",
+    "description": "Packages for CI with Drupal 8 for https://gitlab.com/mog33/drupal8ci.",
+    "type": "project",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "hirak/prestissimo": "^0.3.8",
         "edgedesign/phpqa": "^1.21",
@@ -26,7 +31,5 @@
         "symfony/phpunit-bridge": "^3.4.3",
         "symfony/debug": "^3.4.0",
         "justinrainbow/json-schema": "^5.2"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
