@@ -41,9 +41,6 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir /var/www/.composer /var/www/.node \
-  && chmod 777 /var/www
-
 # Install Chromium 76 on debian.
 
 COPY 99defaultrelease /etc/apt/apt.conf.d/99defaultrelease
@@ -53,7 +50,12 @@ RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak \
   && apt-get update && apt-get -t testing install --no-install-recommends -y \
   chromium
 
+RUN mkdir /var/www/.composer /var/www/.node \
+  && chmod 777 /var/www \
+  && chown www-data:www-data /var/www/.composer /var/www/.node
+
 WORKDIR /var/www/.composer
+USER www-data
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 # Install Drupal dev third party and upgrade Php-unit.
@@ -77,13 +79,14 @@ RUN cp /var/www/html/core/package.json /var/www/.node \
   && npm cache clean --force \
   && rm -rf /tmp/*
 
+USER ROOT
+
 COPY run-tests.sh /scripts/run-tests.sh
 COPY start-chrome.sh /scripts/start-chrome.sh
 RUN chmod +x /scripts/*.sh
 
 # Remove Apache logs to stdout from the php image (used by Drupal image).
-RUN rm -f /var/log/apache2/access.log \
-  && chown -R www-data:www-data /var/www/.composer /var/www/.node
+RUN rm -f /var/log/apache2/access.log
 
 # Fix Php performances.
 RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini \
