@@ -59,37 +59,48 @@ clean_prepare:
 
 test: clean-containers build build_tests
 
+test_all: clean-containers build_variants build_variants_tests
+
 build:
 	$(call docker_build,drupal8ci_8_7,./8.7/drupal)
-	$(call docker_build,drupal8ci_8_7-no-drupal,./8.7/no-drupal)
-	$(call docker_build,drupal8ci_8_7-selenium,./8.7/selenium)
-	$(call docker_build,drupal8ci_8_7-selenium-no-drupal,./8.7/selenium-no-drupal)
 	$(call docker_build,drupal8ci_8_8,./8.8/drupal)
-	$(call docker_build,drupal8ci_8_8-selenium,./8.8/selenium)
 
 build_tests:
 	$(call docker_tests,drupal8ci_8_7)
+	$(call docker_tests,drupal8ci_8_8)
+
+build_variants:
+	$(call docker_build,drupal8ci_8_7-no-drupal,./8.7/no-drupal)
+	$(call docker_build,drupal8ci_8_7-selenium,./8.7/selenium)
+	$(call docker_build,drupal8ci_8_7-selenium-no-drupal,./8.7/selenium-no-drupal)
+	$(call docker_build,drupal8ci_8_8-selenium,./8.8/selenium)
+
+build_variants_tests:
 	$(call docker_tests,drupal8ci_8_7-no-drupal)
 	$(call docker_tests,drupal8ci_8_7-selenium)
 	$(call docker_tests,drupal8ci_8_7-selenium-no-drupal)
-	$(call docker_tests,drupal8ci_8_8)
 	$(call docker_tests,drupal8ci_8_8-selenium)
 
 push:
-	docker logout
+	@docker logout
 	docker login -u mogtofu33
 	$(call push_docker,drupal8ci_8_7,8.7)
+	$(call push_docker,drupal8ci_8_8,8.8)
+	docker logout
+
+push_variants:
+	@docker logout
+	docker login -u mogtofu33
 	$(call push_docker,drupal8ci_8_7-no-drupal,8.7-no-drupal)
 	$(call push_docker,drupal8ci_8_7-selenium,8.7-selenium)
 	$(call push_docker,drupal8ci_8_7-selenium-no-drupal,8.7-selenium-no-drupal)
-	$(call push_docker,drupal8ci_8_8,8.8)
 	$(call push_docker,drupal8ci_8_8-selenium,8.8-selenium)
 	# No drupal variant is the same.
 	$(call push_docker,drupal8ci_8_7-no-drupal,8.8-no-drupal)
 	$(call push_docker,drupal8ci_8_7-selenium-no-drupal,8.8-selenium-no-drupal)
 	docker logout
 
-release: clean build build_tests push
+release: clean build build_tests push build_variants build_variants_tests push_variants
 
 clean: clean-containers clean-images
 

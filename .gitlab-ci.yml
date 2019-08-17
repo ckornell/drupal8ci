@@ -52,6 +52,9 @@ variables:
 .make_build:
   - &make_build apk --no-cache add make gettext && make build
 
+.make_build_variants:
+  - &make_build_variants apk --no-cache add make gettext && make build_variants
+
 .test_images: &test_images
   before_script:
     - *docker_login_gitlab
@@ -61,6 +64,16 @@ variables:
   before_script:
     - *docker_login_gitlab
     - *make_build
+    - *docker_pull_base
+  script: *docker_build_push
+  only:
+    - master
+    - testing
+
+.build_image_variants: &build_image_variants
+  before_script:
+    - *docker_login_gitlab
+    - *make_build_variants
     - *docker_pull_base
   script: *docker_build_push
   only:
@@ -125,7 +138,7 @@ r:ci:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}
 
 no-drupal:
-  <<: *build_image
+  <<: *build_image_variants
   stage: build variant
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
@@ -145,7 +158,7 @@ r:no-drupal:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
 
 selenium:
-  <<: *build_image
+  <<: *build_image_variants
   stage: build variant
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
@@ -165,7 +178,7 @@ r:selenium:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
 
 selenium-no-drupal:
-  <<: *build_image
+  <<: *build_image_variants
   stage: build variant no drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
@@ -185,7 +198,7 @@ r:selenium-no-drupal:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
 
 dev:
-  <<: *build_image
+  <<: *build_image_variants
   stage: build variant dev
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
@@ -205,7 +218,7 @@ r:dev:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
 
 dev-selenium:
-  <<: *build_image
+  <<: *build_image_variants
   stage: build variant dev-selenium
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium
