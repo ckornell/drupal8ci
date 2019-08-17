@@ -6,7 +6,7 @@ grn=$'\e[1;32m'
 end=$'\e[0m'
 __error=0
 
-printf "PATH: %s\\n" "${PATH}"
+printf "\\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 if [ -x "$(command -v php)" ]; then
   php -v | grep built
@@ -158,9 +158,12 @@ if [ -f ./run-tests-extra.sh ]; then
   source ./run-tests-extra.sh
 fi
 
+printf "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+
 if [ $__error = 1 ]; then
   printf "\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
   exit 1
 fi
 
+printf "\\n%s[SUCCESS] Tests passed!%s\\n\\n" "${grn}" "${end}"
 exit 0

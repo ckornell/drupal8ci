@@ -1,5 +1,5 @@
 # https://gitlab.com/mog33/drupal8ci
-FROM mogtofu33/drupal8ci:8.8.x-dev
+FROM mogtofu33/drupal8ci:8.8
 
 LABEL maintainer="dev-drupal.com"
 
