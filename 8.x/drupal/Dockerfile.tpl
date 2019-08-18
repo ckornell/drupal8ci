@@ -42,14 +42,9 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Chromium 76 on debian.
-
-COPY 99defaultrelease /etc/apt/apt.conf.d/99defaultrelease
-COPY sources.list /etc/apt/sources.list.d/sources.list
-
-RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak \
-  && apt-get update && apt-get -t testing install --no-install-recommends -y \
-  chromium
+RUN mkdir -p /var/www/.composer /var/www/.node /var/www/html/vendor/bin/ \
+  && chmod 777 /var/www \
+  && chown -R www-data:www-data /var/www/.composer /var/www/.node /var/www/html/vendor
 
 RUN mkdir -p /var/www/.composer /var/www/.node /var/www/html/vendor/bin/ \
   && chmod 777 /var/www \
@@ -80,8 +75,6 @@ RUN ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
   && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   && ln -s /var/www/.node/node_modules/.bin/* /usr/local/bin \
   && ln -s /var/www/.node/node_modules /var/www/html/core/node_modules
-
-USER ROOT
 
 COPY run-tests.sh /scripts/run-tests.sh
 COPY start-chrome.sh /scripts/start-chrome.sh
