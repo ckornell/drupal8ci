@@ -1,3 +1,9 @@
+DRUPAL_CURRENT_STABLE=8.7
+DRUPAL_CURRENT_DEV=8.8
+
+STABLE_TPL=8.x
+DEV_TPL=8.x-dev
+
 define docker_build
 	docker build --compress --tag $(1) $(2);
 endef
@@ -24,7 +30,7 @@ define push_docker
 endef
 
 define file_prepare
-	@cp -r ./8.x/ ./$(1)/;
+	@cp -r ./${STABLE_TPL}/ ./$(1)/;
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
@@ -36,7 +42,7 @@ define file_prepare
 endef
 
 define file_prepare_dev
-	@cp -r ./8.x-dev/ ./$(1)/;
+	@cp -r ./${DEV_TPL}/ ./$(1)/;
 	@DRUPAL_DEV_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@DRUPAL_DEV_TAG="$(1)" envsubst < "./$(1)/selenium/Dockerfile.tpl" > "./$(1)/selenium/Dockerfile";
@@ -50,54 +56,54 @@ endef
 prepare: clean_prepare file_prepare
 
 file_prepare:
-	$(call file_prepare,8.7)
-	$(call file_prepare_dev,8.8,8.8.x-dev,8.7)
+	$(call file_prepare,${DRUPAL_CURRENT_STABLE})
+	$(call file_prepare_dev,${DRUPAL_CURRENT_DEV},${DRUPAL_CURRENT_DEV}.x-dev,${DRUPAL_CURRENT_STABLE})
 
 clean_prepare:
-	$(call clean_prepare,8.7)
-	$(call clean_prepare,8.8)
+	$(call clean_prepare,${DRUPAL_CURRENT_STABLE})
+	$(call clean_prepare,${DRUPAL_CURRENT_DEV})
 
 test: clean-containers build build_tests
 
 test_all: clean-containers build_variants build_variants_tests
 
 build:
-	$(call docker_build,drupal8ci_8_7,./8.7/drupal)
-	$(call docker_build,drupal8ci_8_8,./8.8/drupal)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV},./${DRUPAL_CURRENT_STABLE}/drupal)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV},./${DRUPAL_CURRENT_DEV}/drupal)
 
 build_tests:
-	$(call docker_tests,drupal8ci_8_7)
-	$(call docker_tests,drupal8ci_8_8)
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV})
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV})
 
 build_variants:
-	$(call docker_build,drupal8ci_8_7-no-drupal,./8.7/no-drupal)
-	$(call docker_build,drupal8ci_8_7-selenium,./8.7/selenium)
-	$(call docker_build,drupal8ci_8_7-selenium-no-drupal,./8.7/selenium-no-drupal)
-	$(call docker_build,drupal8ci_8_8-selenium,./8.8/selenium)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal,./${DRUPAL_CURRENT_STABLE}/no-drupal)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,./${DRUPAL_CURRENT_STABLE}/selenium)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,./${DRUPAL_CURRENT_STABLE}/selenium-no-drupal)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,./${DRUPAL_CURRENT_DEV}/selenium)
 
 build_variants_tests:
-	$(call docker_tests,drupal8ci_8_7-no-drupal)
-	$(call docker_tests,drupal8ci_8_7-selenium)
-	$(call docker_tests,drupal8ci_8_7-selenium-no-drupal)
-	$(call docker_tests,drupal8ci_8_8-selenium)
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal)
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
 
 push:
 	@docker logout
 	docker login -u mogtofu33
-	$(call push_docker,drupal8ci_8_7,8.7)
-	$(call push_docker,drupal8ci_8_8,8.8)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV},${DRUPAL_CURRENT_STABLE})
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV},${DRUPAL_CURRENT_DEV})
 	docker logout
 
 push_variants:
 	@docker logout
 	docker login -u mogtofu33
-	$(call push_docker,drupal8ci_8_7-no-drupal,8.7-no-drupal)
-	$(call push_docker,drupal8ci_8_7-selenium,8.7-selenium)
-	$(call push_docker,drupal8ci_8_7-selenium-no-drupal,8.7-selenium-no-drupal)
-	$(call push_docker,drupal8ci_8_8-selenium,8.8-selenium)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal,${DRUPAL_CURRENT_STABLE}-no-drupal)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,${DRUPAL_CURRENT_STABLE}-selenium)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,${DRUPAL_CURRENT_STABLE}-selenium-no-drupal)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,${DRUPAL_CURRENT_DEV}-selenium)
 	# No drupal variant is the same.
-	$(call push_docker,drupal8ci_8_7-no-drupal,8.8-no-drupal)
-	$(call push_docker,drupal8ci_8_7-selenium-no-drupal,8.8-selenium-no-drupal)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal,${DRUPAL_CURRENT_DEV}-no-drupal)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
 	docker logout
 
 release: clean build build_tests push build_variants build_variants_tests push_variants
@@ -105,19 +111,19 @@ release: clean build build_tests push build_variants build_variants_tests push_v
 clean: clean-containers clean-images
 
 clean-containers:
-	$(call docker_clean,drupal8ci_8_7)
-	$(call docker_clean,drupal8ci_8_7-no-drupal)
-	$(call docker_clean,drupal8ci_8_7-selenium)
-	$(call docker_clean,drupal8ci_8_7-selenium-no-drupal)
-	$(call docker_clean,drupal8ci_8_8)
-	$(call docker_clean,drupal8ci_8_8-selenium)
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV})
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal)
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV})
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
 
 clean-images:
-	-docker rmi drupal8ci_8_7;
-	-docker rmi drupal8ci_8_7-no-drupal;
-	-docker rmi drupal8ci_8_7-selenium;
-	-docker rmi drupal8ci_8_7-selenium-no-drupal;
-	-docker rmi drupal8ci_8_8;
-	-docker rmi drupal8ci_8_8-selenium;
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV};
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal;
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium;
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal;
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV};
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium;
 
 .PHONY: test clean prepare build run push release
