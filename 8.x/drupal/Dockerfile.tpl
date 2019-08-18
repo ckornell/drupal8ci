@@ -50,9 +50,9 @@ RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak \
   && apt-get update && apt-get -t testing install --no-install-recommends -y \
   chromium
 
-RUN mkdir /var/www/.composer /var/www/.node \
+RUN mkdir -p /var/www/.composer /var/www/.node /var/www/html/vendor/bin/ \
   && chmod 777 /var/www \
-  && chown www-data:www-data /var/www/.composer /var/www/.node
+  && chown -R www-data:www-data /var/www/.composer /var/www/.node /var/www/html/vendor
 
 WORKDIR /var/www/.composer
 USER www-data
@@ -61,9 +61,6 @@ USER www-data
 # Install Drupal dev third party and upgrade Php-unit.
 COPY composer.json /var/www/.composer/composer.json
 RUN composer install --no-ansi -n --profile --no-suggest \
-  && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
-  && mkdir -p /var/www/html/vendor/bin/ \
-  && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*
 
@@ -74,10 +71,14 @@ RUN cp /var/www/html/core/package.json /var/www/.node \
   && npm install --no-audit \
   && npm install --no-audit git://github.com/sasstools/sass-lint.git#develop \
   && yarn install \
+  && npm cache clean --force
+
+USER root
+
+RUN ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
+  && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   && ln -s /var/www/.node/node_modules/.bin/* /usr/local/bin \
-  && ln -s /var/www/.node/node_modules /var/www/html/core/node_modules \
-  && npm cache clean --force \
-  && rm -rf /tmp/*
+  && ln -s /var/www/.node/node_modules /var/www/html/core/node_modules
 
 USER ROOT
 
