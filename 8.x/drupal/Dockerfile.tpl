@@ -46,10 +46,6 @@ RUN mkdir -p /var/www/.composer /var/www/.node /var/www/html/vendor/bin/ \
   && chmod 777 /var/www \
   && chown -R www-data:www-data /var/www/.composer /var/www/.node /var/www/html/vendor
 
-RUN mkdir -p /var/www/.composer /var/www/.node /var/www/html/vendor/bin/ \
-  && chmod 777 /var/www \
-  && chown -R www-data:www-data /var/www/.composer /var/www/.node /var/www/html/vendor
-
 WORKDIR /var/www/.composer
 USER www-data
 
