@@ -6,7 +6,7 @@ grn=$'\e[1;32m'
 end=$'\e[0m'
 __error=0
 
-printf "\\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+printf "\\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\\n"
 
 if [ -x "$(command -v php)" ]; then
   php -v | grep built
@@ -161,9 +161,9 @@ fi
 printf "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 
 if [ $__error = 1 ]; then
-  printf "\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
+  printf "\\n\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
   exit 1
 fi
 
-printf "\\n%s[SUCCESS] Tests passed!%s\\n\\n" "${grn}" "${end}"
+printf "\\n\\n%s[SUCCESS] Tests passed!%s\\n\\n" "${grn}" "${end}"
 exit 0

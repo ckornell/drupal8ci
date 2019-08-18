@@ -4,250 +4,129 @@ services:
   - docker:dind
 
 stages:
-  - build
-  - test
-  - release
-  - build variant
-  - test variant
-  - release variant
-  - build variant no drupal
-  - test variant no drupal
-  - release variant no drupal
-  - build variant dev
-  - test variant dev
-  - release variant dev
-  - build variant dev-selenium
-  - test variant dev-selenium
-  - release variant dev-selenium
-  - release variant dev-no-drupal
+  # Stable version.
+  - stable
+  - stable selenium
+  # Dev version.
+  - dev
+  - dev selenium
+  # No Drupal versions are the same for stable and dev.
+  - no drupal
+  - no drupal selenium
 
 variables:
+  DRUPAL_CURRENT_STABLE: '8.7'
+  DRUPAL_CURRENT_DEV: '8.8'
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
-  DRUPAL_CURRENT_STABLE: '8.7'
-  DRUPAL_CURRENT_DEV: '8.8'
 
-################################################################################
-# Templates to avoid repeat. A bit Xtrem here!
-# https://docs.gitlab.com/ee/ci/yaml/#anchors
-################################################################################
-
-.docker_login_gitlab:
-  - &docker_login_gitlab docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-
-.docker_pull:
-  - &docker_pull docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
-
-.docker_pull_base:
-  - &docker_pull_base docker pull $IMAGE_BASE || true
-
-.docker_build_push:
-  script: &docker_build_push
-    - *docker_pull
-    - docker build --compress --cache-from $RELEASE_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE
-
-.make_build:
-  - &make_build apk --no-cache add make gettext && make build
-
-.make_build_variants:
-  - &make_build_variants apk --no-cache add make gettext && make build_variants
-
-.test_images: &test_images
-  before_script:
-    - *docker_login_gitlab
-    - *docker_pull
-
-.build_image: &build_image
-  before_script:
-    - *docker_login_gitlab
-    - *make_build
-    - *docker_pull_base
-  script: *docker_build_push
-  only:
-    - master
-    - testing
-
-.build_image_variants: &build_image_variants
-  before_script:
-    - *docker_login_gitlab
-    - *make_build_variants
-    - *docker_pull_base
-  script: *docker_build_push
-  only:
-    - master
-    - testing
-
-.test_drupal8ci: &test_drupal8ci
-  <<: *test_images
-  script:
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
-  only:
-    - master
-    - testing
-
-.release: &release
-  before_script:
-    - docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
-  script:
-    - *docker_pull
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    - docker push $RELEASE_IMAGE/$IMAGE
-  only:
-    - master
-
-.release_no_drupal: &release_no_drupal
-  before_script:
-    - docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
-  script:
-    - *docker_pull
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$TAG
-    - docker push $RELEASE_IMAGE/$TAG
-  only:
-    - master
-
-################################################################################
-# Jobs based on previous templates.
-# Only variables need to be changed if needed.
-################################################################################
+.docker_login_hub:
+  - &docker_login_hub docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
 
 before_script:
-  - *docker_login_gitlab
-  - *make_build
+  # Pull base image from Docker hub.
+  - docker pull $IMAGE_BASE || true
+  # Login to Gitlab and pull current image if exist.
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
 
-ci:
-  <<: *build_image
-  stage: build
+stable:
+  stage: stable
+  script:
+    - docker pull $EXTRA_IMAGE
+    # Build the image from cache.
+    - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    # Test
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
+    # Push to Gitlab registry.
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE
+    # Login to Docker hub.
+    - *docker_login_hub
+    # Tag for Docker hub and push.
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker push $RELEASE_IMAGE/$IMAGE
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}
     DIR: '${DRUPAL_CURRENT_STABLE}/drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
+    EXTRA_IMAGE: composer:latest
 
-t:ci:
-  <<: *test_drupal8ci
-  stage: test
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}
-
-r:ci:
-  <<: *release
-  stage: release
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}
-
-no-drupal:
-  <<: *build_image_variants
-  stage: build variant
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
-    DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
-    IMAGE_BASE: mogtofu33/drupal8ci:${DRUPAL_CURRENT_STABLE}
-
-t:no-drupal:
-  <<: *test_drupal8ci
-  stage: test variant
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
-
-r:no-drupal:
-  <<: *release
-  stage: release variant
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
+.build_test_release:
+  script:
+    # Make sure we are using Gitlab image.
+    - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
+    # Build the image from cache.
+    - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    # Test
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
+    # Push to Gitlab registry for next steps.
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE
+    # Login to Docker hub.
+    - *docker_login_hub
+    # Tag for Docker hub and push.
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker push $RELEASE_IMAGE/$IMAGE
 
 selenium:
-  <<: *build_image_variants
-  stage: build variant
+  stage: stable selenium
+  extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
     DIR: '${DRUPAL_CURRENT_STABLE}/selenium'
-    IMAGE_BASE: mogtofu33/drupal8ci:${DRUPAL_CURRENT_STABLE}
-
-t:selenium:
-  <<: *test_drupal8ci
-  stage: test variant
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
-
-r:selenium:
-  <<: *release
-  stage: release variant
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
-
-selenium-no-drupal:
-  <<: *build_image_variants
-  stage: build variant no drupal
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
-    DIR: '${DRUPAL_CURRENT_STABLE}/selenium-no-drupal'
-    IMAGE_BASE: mogtofu33/drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
-
-t:selenium-no-drupal:
-  <<: *test_drupal8ci
-  stage: test variant no drupal
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
-
-r:selenium-no-drupal:
-  <<: *release
-  stage: release variant no drupal
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
 
 dev:
-  <<: *build_image_variants
-  stage: build variant dev
+  stage: dev
+  extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
-    IMAGE_BASE: mogtofu33/drupal8ci:${DRUPAL_CURRENT_STABLE}
-
-t:dev:
-  <<: *test_drupal8ci
-  stage: test variant dev
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
-
-r:dev:
-  <<: *release
-  stage: release variant dev
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
 
 dev-selenium:
-  <<: *build_image_variants
-  stage: build variant dev-selenium
+  stage: dev selenium
+  extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium
     DIR: '${DRUPAL_CURRENT_DEV}/selenium'
-    IMAGE_BASE: mogtofu33/drupal8ci:${DRUPAL_CURRENT_DEV}
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_DEV}
 
-t:dev-selenium:
-  <<: *test_drupal8ci
-  stage: test variant dev-selenium
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium
+.no_drupal:
+  script:
+    # Make sure we are using Gitlab image.
+    - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
+    # Build the image from cache.
+    - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    # Test
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
+    # Push to Gitlab registry for all versions.
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
+    # Login to Docker hub.
+    - *docker_login_hub
+    # Tag for Docker hub and push for all versions.
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
+    - docker push $RELEASE_IMAGE/$IMAGE
+    - docker push $RELEASE_IMAGE/$IMAGE_DEV
 
-r:dev-selenium:
-  <<: *release
-  stage: release variant dev-selenium
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium
-
-# Just tag the existing images.
-r:dev-no-drupal:
-  <<: *release_no_drupal
-  stage: release variant dev-no-drupal
+no-drupal:
+  stage: no drupal
+  extends: .no_drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
-    TAG: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
+    IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
+    DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
 
-r:dev-selenium-no-drupal:
-  <<: *release_no_drupal
-  stage: release variant dev-no-drupal
+no-drupal-selenium:
+  stage: no drupal selenium
+  extends: .no_drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
-    TAG: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium-no-drupal
+    IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium-no-drupal
+    DIR: '${DRUPAL_CURRENT_STABLE}/selenium-no-drupal'
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
