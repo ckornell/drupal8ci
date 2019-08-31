@@ -80,24 +80,10 @@ else
   __error=1
 fi
 
-if [ -x "$(command -v phpunit)" ]; then
-  phpunit --version | grep 'PHPUnit'
+if [ -x "$(command -v chromium)" ]; then
+  chromium --version
 else
-  printf "%sPhpunit missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v google-chrome)" ]; then
-  google-chrome --version
-else
-  printf "%sGoogle Chrome missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v chromedriver)" ]; then
-  chromedriver --version
-else
-  printf "%sChromedriver missing!%s\\n" "${red}" "${end}"
+  printf "%sChromium missing!%s\\n" "${red}" "${end}"
   __error=1
 fi
 

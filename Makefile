@@ -1,5 +1,6 @@
 DRUPAL_CURRENT_STABLE=8.7
 DRUPAL_CURRENT_DEV=8.8
+CHROME_DRIVER_VERSION=76.0.3809.68
 
 STABLE_TPL=8.x
 DEV_TPL=8.x-dev
@@ -31,7 +32,7 @@ endef
 
 define file_prepare
 	@cp -r ./${STABLE_TPL}/ ./$(1)/;
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_TAG="$(1)" CHROME_DRIVER_VERSION=${CHROME_DRIVER_VERSION} envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
 	@rm -f "./$(1)/no-drupal/Dockerfile.tpl";
@@ -47,6 +48,7 @@ define file_prepare_dev
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@DRUPAL_DEV_TAG="$(1)" envsubst < "./$(1)/selenium/Dockerfile.tpl" > "./$(1)/selenium/Dockerfile";
 	@rm -f "./$(1)/selenium/Dockerfile.tpl";
+	@cp -u ./8.x/selenium/*.sh ./$(1)/selenium/;
 endef
 
 define clean_prepare
@@ -106,8 +108,6 @@ push_variants:
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
 	docker logout
 
-release: clean build build_tests push build_variants build_variants_tests push_variants
-
 clean: clean-containers clean-images
 
 clean-containers:
@@ -125,5 +125,11 @@ clean-images:
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal;
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV};
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium;
+
+dry-release: clean build build_tests build_variants build_variants_tests
+
+push-release: push push_variants
+
+release: clean build build_tests push build_variants build_variants_tests push_variants
 
 .PHONY: test clean prepare build run push release
