@@ -6,13 +6,10 @@ services:
 stages:
   # Stable version.
   - stable
-  # - stable selenium
   # Dev version.
   - dev
-  # - dev selenium
   # No Drupal versions are the same for stable and dev.
   - no drupal
-  # - no drupal selenium
 
 variables:
   DRUPAL_CURRENT_STABLE: '8.7'
@@ -85,17 +82,6 @@ stable:
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
 
-# selenium:
-#   stage: stable selenium
-#   except:
-#     variables:
-#       - $SKIP_STABLE_SELENIUM == "1"
-#   extends: .build_test_release
-#   variables:
-#     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium
-#     DIR: '${DRUPAL_CURRENT_STABLE}/selenium'
-#     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
-
 dev:
   stage: dev
   except:
@@ -106,17 +92,6 @@ dev:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
-
-# dev-selenium:
-#   stage: dev selenium
-#   except:
-#     variables:
-#       - $SKIP_DEV_SELENIUM == "1"
-#   extends: .build_test_release
-#   variables:
-#     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium
-#     DIR: '${DRUPAL_CURRENT_DEV}/selenium'
-#     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_DEV}
 
 .no_drupal:
   script:
@@ -152,15 +127,3 @@ no-drupal:
     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
-
-# no-drupal-selenium:
-#   stage: no drupal selenium
-#   except:
-#     variables:
-#       - $SKIP_NO_DRUPAL_SELENIUM == "1"
-#   extends: .no_drupal
-#   variables:
-#     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium-no-drupal
-#     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-selenium-no-drupal
-#     DIR: '${DRUPAL_CURRENT_STABLE}/selenium-no-drupal'
-#     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-selenium

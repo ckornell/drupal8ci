@@ -36,19 +36,12 @@ define file_prepare
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
 	@rm -f "./$(1)/no-drupal/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium/Dockerfile.tpl" > "./$(1)/selenium/Dockerfile";
-	@rm -f "./$(1)/selenium/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium-no-drupal/Dockerfile.tpl" > "./$(1)/selenium-no-drupal/Dockerfile";
-	@rm -f "./$(1)/selenium-no-drupal/Dockerfile.tpl";
 endef
 
 define file_prepare_dev
 	@cp -r ./${DEV_TPL}/ ./$(1)/;
 	@DRUPAL_DEV_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
-	@DRUPAL_DEV_TAG="$(1)" envsubst < "./$(1)/selenium/Dockerfile.tpl" > "./$(1)/selenium/Dockerfile";
-	@rm -f "./$(1)/selenium/Dockerfile.tpl";
-	@cp -u ./8.x/selenium/*.sh ./$(1)/selenium/;
 endef
 
 define clean_prepare
@@ -79,15 +72,9 @@ build_tests:
 
 build_variants:
 	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal,./${DRUPAL_CURRENT_STABLE}/no-drupal)
-	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,./${DRUPAL_CURRENT_STABLE}/selenium)
-	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,./${DRUPAL_CURRENT_STABLE}/selenium-no-drupal)
-	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,./${DRUPAL_CURRENT_DEV}/selenium)
 
 build_variants_tests:
 	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal)
-	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
-	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
-	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
 
 push:
 	@docker logout
@@ -100,12 +87,8 @@ push_variants:
 	@docker logout
 	docker login -u mogtofu33
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal,${DRUPAL_CURRENT_STABLE}-no-drupal)
-	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,${DRUPAL_CURRENT_STABLE}-selenium)
-	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,${DRUPAL_CURRENT_STABLE}-selenium-no-drupal)
-	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium,${DRUPAL_CURRENT_DEV}-selenium)
 	# No drupal variant is the same.
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal,${DRUPAL_CURRENT_DEV}-no-drupal)
-	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal,${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
 	docker logout
 
 clean: clean-containers clean-images
@@ -113,18 +96,12 @@ clean: clean-containers clean-images
 clean-containers:
 	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV})
 	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal)
-	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
-	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal)
 	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV})
-	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV}-selenium)
 
 clean-images:
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV};
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-no-drupal;
-	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium;
-	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium-no-drupal;
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV};
-	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV}-selenium;
 
 dry-release: clean build build_tests build_variants build_variants_tests
 
