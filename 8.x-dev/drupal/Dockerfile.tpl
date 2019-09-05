@@ -2,6 +2,9 @@ FROM mogtofu33/drupal8ci:$DRUPAL_TAG
 
 LABEL maintainer="dev-drupal.com"
 
+# Composer.
+COPY --chown=www-data:www-data --from=composer:1.9 /usr/bin/composer /usr/local/bin/composer
+
 # Remove the vanilla Drupal project that comes with the parent image.
 RUN rm -rf ..?* .[!.]* *
 
