@@ -8,7 +8,7 @@
 
 ## Details
 
-[Drupal 8](https://www.drupal.org/8) tools image with all Php / Node tools needed for CI or Local Build/Tests/Lint.
+[Drupal 8](https://www.drupal.org/8) ci image with all Php / Node tools needed for CI or Local Build/Tests/Lint.
 
 Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
@@ -32,9 +32,9 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 ## Basic usage (local)
 
-The default image `8.7` include Drupal core with Chromium, a variant `8.7-selenium` include Selenium server standalone chrome.
+The default image `8.7-drupal` include Drupal core with Google Chrome.
 
-Tag `8.8` rely on current Drupal `8.8.x-dev` version.
+Tag `8.8-drupal` rely on current Drupal `8.8.x-dev` version.
 
 Variants `no-drupal` are used for a project including a Drupal template from a `composer.json`.
 

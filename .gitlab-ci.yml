@@ -58,7 +58,7 @@ stable:
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}
+    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-drupal
     DIR: '${DRUPAL_CURRENT_STABLE}/drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
     EXTRA_IMAGE: composer:latest
@@ -89,7 +89,7 @@ dev:
       - $SKIP_DEV == "1"
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}
+    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-drupal
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
 
