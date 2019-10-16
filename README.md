@@ -40,8 +40,6 @@ Variants `no-drupal` are used for a project including a Drupal template from a `
 
 To use with a local Drupal 8 managed by composer, mount your Drupal on `/var/www/html`
 
-Those images can be used for local tests with Docker, see [Running the jobs locally with Docker](https://gitlab.com/mog33/gitlab-ci-drupal#running-the-jobs-locally-with-docker)
-
 ## Build
 
 CI variable `CI_DO_RELEASE`, default to 1 to push to Docker hub.
