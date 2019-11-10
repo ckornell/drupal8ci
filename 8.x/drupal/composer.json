@@ -9,7 +9,7 @@
         "edgedesign/phpqa": "^1.23",
         "consolidation/robo": "^1.4",
         "drupal/coder": "^8.3",
-        "drush/drush": "^10",
+        "drush/drush": "^9.7",
         "jakub-onderka/php-parallel-lint": "^1.0",
         "jakub-onderka/php-console-highlighter": "^0.4.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
