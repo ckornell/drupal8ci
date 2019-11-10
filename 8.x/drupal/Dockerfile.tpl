@@ -85,9 +85,7 @@ RUN composer install --no-ansi -n --profile --no-suggest \
 WORKDIR /var/www/html
 
 RUN composer run-script drupal-phpunit-upgrade --no-ansi \
-  && composer clear-cache \
-  && rm -rf /tmp/* \
-  && chown -R www-data:www-data /var/www/html/vendor
+  && composer clear-cache
 
 # Manage final tasks.
 USER root

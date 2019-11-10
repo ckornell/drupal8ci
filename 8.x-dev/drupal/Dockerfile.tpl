@@ -11,11 +11,17 @@ RUN set -eux; \
   rm drupal.tar.gz; \
   chown -R www-data:www-data sites modules themes
 
+# Composer install for dev
+RUN mkdir -p /var/www/html/vendor \
+  && chown -R www-data:www-data /var/www/html/vendor
+
 USER www-data
 
 WORKDIR /var/www/html
 
 RUN composer install --no-suggest --prefer-dist --no-interaction --no-ansi \
-  && composer clear-cache \
-  && rm -rf /tmp/* \
-  && chown -R www-data:www-data /var/www/html/vendor
+  && composer clear-cache
+
+USER root
+
+RUN ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/
