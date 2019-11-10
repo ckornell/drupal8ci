@@ -1,4 +1,4 @@
-FROM mogtofu33/drupal8ci:$DRUPAL_TAG
+FROM mogtofu33/drupal8ci:$DRUPAL_TAG-drupal
 
 LABEL maintainer="dev-drupal.com"
 

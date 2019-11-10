@@ -63,11 +63,7 @@ stable:
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
     EXTRA_IMAGE: composer:latest
 
-dev:
-  stage: dev
-  except:
-    variables:
-      - $SKIP_DEV == "1"
+.build_test_release:
   script:
     # Make sure we are using Gitlab image.
     - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
@@ -85,23 +81,26 @@ dev:
     - if [ ${CI_DO_RELEASE} == 1 ]; then
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
+
+dev:
+  stage: dev
+  except:
+    variables:
+      - $SKIP_DEV == "1"
+  extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-drupal
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
 
-no-drupal:
-  stage: no drupal
-  except:
-    variables:
-      - $SKIP_NO_DRUPAL == "1"
+.no_drupal:
   script:
     # Make sure we are using Gitlab image.
     - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
-    # - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
     # Push to Gitlab registry for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
@@ -116,8 +115,15 @@ no-drupal:
         docker push $RELEASE_IMAGE/$IMAGE;
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
       fi
+
+no-drupal:
+  stage: no drupal
+  except:
+    variables:
+      - $SKIP_NO_DRUPAL == "1"
+  extends: .no_drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}

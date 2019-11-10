@@ -1,7 +1,7 @@
 # https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
 # https://github.com/docker-library/drupal/blob/master/$DRUPAL_TAG/apache/Dockerfile
 # https://gitlab.com/mog33/drupal8ci
-FROM mogtofu33/drupal8ci:$DRUPAL_TAG
+FROM mogtofu33/drupal8ci:$DRUPAL_TAG-no-drupal
 
 LABEL maintainer="dev-drupal.com"
 
