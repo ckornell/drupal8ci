@@ -1,7 +1,11 @@
 DRUPAL_CURRENT_STABLE=8.7
-DRUPAL_CURRENT_DEV=8.8
+DRUPAL_CURRENT_TEST=8.8
+DRUPAL_CURRENT_TEST_RELEASE=8.8.0-beta1
+DRUPAL_CURRENT_DEV=8.9
+DRUPAL_CURRENT_DEV_RELEASE=8.9.x-dev
 
 STABLE_TPL=8.x
+TEST_TPL=8.x-dev
 DEV_TPL=8.x-dev
 
 define docker_build
@@ -39,7 +43,7 @@ endef
 
 define file_prepare_dev
 	@cp -r ./${DEV_TPL}/ ./$(1)/;
-	@DRUPAL_DEV_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 endef
 
@@ -51,10 +55,12 @@ prepare: clean_prepare file_prepare
 
 file_prepare:
 	$(call file_prepare,${DRUPAL_CURRENT_STABLE})
-	$(call file_prepare_dev,${DRUPAL_CURRENT_DEV},${DRUPAL_CURRENT_DEV}.x-dev,${DRUPAL_CURRENT_STABLE})
+	$(call file_prepare_dev,${DRUPAL_CURRENT_TEST},${DRUPAL_CURRENT_TEST_RELEASE},${DRUPAL_CURRENT_STABLE})
+	$(call file_prepare_dev,${DRUPAL_CURRENT_DEV},${DRUPAL_CURRENT_DEV_RELEASE},${DRUPAL_CURRENT_STABLE})
 
 clean_prepare:
 	$(call clean_prepare,${DRUPAL_CURRENT_STABLE})
+	$(call clean_prepare,${DRUPAL_CURRENT_TEST})
 	$(call clean_prepare,${DRUPAL_CURRENT_DEV})
 
 test: clean-containers build build_tests
@@ -63,10 +69,12 @@ test_all: clean-containers build_variants build_variants_tests
 
 build:
 	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_STABLE},./${DRUPAL_CURRENT_STABLE}/drupal)
+	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_TEST},./${DRUPAL_CURRENT_TEST}/drupal)
 	$(call docker_build,drupal8ci_${DRUPAL_CURRENT_DEV},./${DRUPAL_CURRENT_DEV}/drupal)
 
 build_tests:
 	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_STABLE})
+	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_TEST})
 	$(call docker_tests,drupal8ci_${DRUPAL_CURRENT_DEV})
 
 build_variants:
@@ -79,6 +87,7 @@ push:
 	@docker logout
 	docker login -u mogtofu33
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_STABLE},${DRUPAL_CURRENT_STABLE}-drupal)
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_TEST},${DRUPAL_CURRENT_TEST}-drupal)
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_DEV},${DRUPAL_CURRENT_DEV}-drupal)
 	docker logout
 
@@ -87,19 +96,22 @@ push_variants:
 	docker login -u mogtofu33
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_STABLE}-no-drupal,${DRUPAL_CURRENT_STABLE}-no-drupal)
 	# No drupal variant is the same.
+	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_STABLE}-no-drupal,${DRUPAL_CURRENT_TEST}-no-drupal)
 	$(call push_docker,drupal8ci_${DRUPAL_CURRENT_STABLE}-no-drupal,${DRUPAL_CURRENT_DEV}-no-drupal)
 	docker logout
 
 clean: clean-containers clean-images
 
 clean-containers:
-	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_STABLE}-drupal)
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_STABLE})
 	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_STABLE}-no-drupal)
+	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_TEST})
 	$(call docker_clean,drupal8ci_${DRUPAL_CURRENT_DEV})
 
 clean-images:
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_STABLE};
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_STABLE}-no-drupal;
+	-docker rmi drupal8ci_${DRUPAL_CURRENT_TEST};
 	-docker rmi drupal8ci_${DRUPAL_CURRENT_DEV};
 
 dry-release: clean build build_tests build_variants build_variants_tests

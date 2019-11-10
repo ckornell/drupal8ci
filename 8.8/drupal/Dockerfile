@@ -6,7 +6,7 @@ LABEL maintainer="dev-drupal.com"
 RUN rm -rf ..?* .[!.]* *
 
 RUN set -eux; \
-  curl -fSL "https://ftp.drupal.org/files/projects/drupal-8.8.x-dev.tar.gz" -o drupal.tar.gz; \
+  curl -fSL "https://ftp.drupal.org/files/projects/drupal-8.8.0-beta1.tar.gz" -o drupal.tar.gz; \
   tar -xz --strip-components=1 -f drupal.tar.gz; \
   rm drupal.tar.gz; \
   chown -R www-data:www-data sites modules themes

@@ -1,4 +1,4 @@
-FROM mogtofu33/drupal8ci:$DRUPAL_TAG-drupal
+FROM mogtofu33/drupal8ci:8.7-drupal
 
 LABEL maintainer="dev-drupal.com"
 
@@ -6,7 +6,7 @@ LABEL maintainer="dev-drupal.com"
 RUN rm -rf ..?* .[!.]* *
 
 RUN set -eux; \
-  curl -fSL "https://ftp.drupal.org/files/projects/drupal-${DRUPAL_DOWNLOAD_TAG}.tar.gz" -o drupal.tar.gz; \
+  curl -fSL "https://ftp.drupal.org/files/projects/drupal-8.9.x-dev.tar.gz" -o drupal.tar.gz; \
   tar -xz --strip-components=1 -f drupal.tar.gz; \
   rm drupal.tar.gz; \
   chown -R www-data:www-data sites modules themes
