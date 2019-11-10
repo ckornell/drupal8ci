@@ -48,14 +48,11 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
 #==================
 # Chromedriver latest stable release.
 # http://chromedriver.chromium.org/downloads/version-selection
-RUN export CHROME_DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
-  && curl -fsSL https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
+RUN curl -fsSL https://chromedriver.storage.googleapis.com/$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip \
     -o /tmp/chromedriver_linux64.zip \
   && unzip /tmp/chromedriver_linux64.zip -d /opt \
   && rm -f /tmp/chromedriver_linux64.zip \
-  && mv /opt/chromedriver /opt/chromedriver-$CHROME_DRIVER_VERSION \
-  && chmod 755 /opt/chromedriver-$CHROME_DRIVER_VERSION \
-  && ln -fs /opt/chromedriver-$CHROME_DRIVER_VERSION /usr/local/bin/chromedriver \
+  && ln -fs /opt/chromedriver /usr/local/bin/chromedriver \
   # Add Chrome as a user
   && groupadd -r chromeuser && useradd -r -g chromeuser -G audio,video chromeuser \
   && mkdir -p /home/chromeuser && chown -R chromeuser:chromeuser /home/chromeuser
