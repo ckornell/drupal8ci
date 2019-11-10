@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-/usr/bin/google-chrome ${CHROME_OPTS}
+if pgrep -x "chrome" > /dev/null
+then
+  echo "Chrome already running!"
+else
+  /usr/bin/google-chrome ${CHROME_OPTS}
+fi

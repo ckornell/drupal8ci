@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-/usr/local/bin/chromedriver ${CHROMEDRIVER_OPTS}
+if pgrep -x "chromedriver" > /dev/null
+then
+  echo "Chromedriver already running!"
+else
+  /usr/local/bin/chromedriver ${CHROMEDRIVER_OPTS}
+fi
