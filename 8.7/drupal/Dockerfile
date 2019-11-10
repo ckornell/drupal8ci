@@ -5,7 +5,6 @@ FROM drupal:8.7-apache
 LABEL maintainer="dev-drupal.com"
 
 ENV DBUS_SESSION_BUS_ADDRESS="/dev/null"
-ARG CHROME_DRIVER_VERSION=76.0.3809.68
 
 # Install needed programs for next steps.
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -23,7 +22,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-  # Google Chrome 76+
+  # Google Chrome latest stable release.
   && curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
   && apt-get update && apt-get install --no-install-recommends -y \
@@ -47,14 +46,16 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #==================
-# Chromedriver
-RUN curl -fsSL https://chromedriver.storage.googleapis.com/76.0.3809.68/chromedriver_linux64.zip \
-  -o /tmp/chromedriver_linux64.zip \
+# Chromedriver latest stable release.
+# http://chromedriver.chromium.org/downloads/version-selection
+RUN CHROME_DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
+  && curl -fsSL https://chromedriver.storage.googleapis.com//chromedriver_linux64.zip \
+    -o /tmp/chromedriver_linux64.zip \
   && unzip /tmp/chromedriver_linux64.zip -d /opt \
   && rm -f /tmp/chromedriver_linux64.zip \
-  && mv /opt/chromedriver /opt/chromedriver-76.0.3809.68 \
-  && chmod 755 /opt/chromedriver-76.0.3809.68 \
-  && ln -fs /opt/chromedriver-76.0.3809.68 /usr/local/bin/chromedriver \
+  && mv /opt/chromedriver /opt/chromedriver- \
+  && chmod 755 /opt/chromedriver- \
+  && ln -fs /opt/chromedriver- /usr/local/bin/chromedriver \
   # Add Chrome as a user
   && groupadd -r chromeuser && useradd -r -g chromeuser -G audio,video chromeuser \
   && mkdir -p /home/chromeuser && chown -R chromeuser:chromeuser /home/chromeuser
@@ -95,6 +96,7 @@ RUN composer run-script drupal-phpunit-upgrade --no-ansi \
 USER root
 
 COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests.sh
+COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests-extra.sh
 COPY --chown=chromeuser:chromeuser start-chromedriver.sh /scripts/start-chromedriver.sh
 COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
 

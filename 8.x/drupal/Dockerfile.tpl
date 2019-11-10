@@ -5,7 +5,6 @@ FROM drupal:$DRUPAL_TAG-apache
 LABEL maintainer="dev-drupal.com"
 
 ENV DBUS_SESSION_BUS_ADDRESS="/dev/null"
-ARG CHROME_DRIVER_VERSION=$CHROME_DRIVER_VERSION
 
 # Install needed programs for next steps.
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -23,7 +22,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-  # Google Chrome 76+
+  # Google Chrome latest stable release.
   && curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
   && apt-get update && apt-get install --no-install-recommends -y \
@@ -47,9 +46,11 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #==================
-# Chromedriver
-RUN curl -fsSL https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
-  -o /tmp/chromedriver_linux64.zip \
+# Chromedriver latest stable release.
+# http://chromedriver.chromium.org/downloads/version-selection
+RUN CHROME_DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
+  && curl -fsSL https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
+    -o /tmp/chromedriver_linux64.zip \
   && unzip /tmp/chromedriver_linux64.zip -d /opt \
   && rm -f /tmp/chromedriver_linux64.zip \
   && mv /opt/chromedriver /opt/chromedriver-$CHROME_DRIVER_VERSION \
@@ -95,6 +96,7 @@ RUN composer run-script drupal-phpunit-upgrade --no-ansi \
 USER root
 
 COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests.sh
+COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests-extra.sh
 COPY --chown=chromeuser:chromeuser start-chromedriver.sh /scripts/start-chromedriver.sh
 COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
 
