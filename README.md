@@ -34,25 +34,25 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 The default image `8.7-drupal` include Drupal core with Google Chrome.
 
-Tag `8.8-drupal` rely on current Drupal `8.8.x-dev` version.
+Tag `8.8-drupal` rely on current Drupal `8.8.0-beta1` version.
 
-Variants `no-drupal` are used for a project including a Drupal template from a `composer.json`.
+Tag `8.9-drupal` rely on current Drupal `8.9.x-dev` version.
+
+Variants `no-drupal` are used for a project including a Drupal template from a `composer.json` and are all the same.
 
 To use with a local Drupal 8 managed by composer, mount your Drupal on `/var/www/html`
 
 ## Build
 
-CI variable `CI_DO_RELEASE`, default to 1 to push to Docker hub.
+CI variable `CI_DO_RELEASE`, default to `1` to push to Docker hub.
 
 Other variables to skip jobs:
 
 ```bash
 SKIP_STABLE              0
-SKIP_STABLE_SELENIUM     0
+SKIP_TEST                0
 SKIP_DEV                 0
-SKIP_DEV_SELENIUM        0
 SKIP_NO_DRUPAL           0
-SKIP_NO_DRUPAL_SELENIUM  0
 ```
 
 ```bash

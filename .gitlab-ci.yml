@@ -6,25 +6,26 @@ services:
 stages:
   # Stable version.
   - stable
+  # Transition version, alpha, beta, rc...
+  - test
   # Dev version.
   - dev
-  # No Drupal versions are the same for stable and dev.
+  # No Drupal versions are the same for all.
   - no drupal
 
 variables:
   DRUPAL_CURRENT_STABLE: '8.7'
-  DRUPAL_CURRENT_DEV: '8.8'
+  DRUPAL_CURRENT_TEST: '8.8'
+  DRUPAL_CURRENT_DEV: '8.9'
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
   CI_DO_RELEASE: 1
   SKIP_STABLE: 0
-  SKIP_STABLE_SELENIUM: 0
+  SKIP_TEST: 0
   SKIP_DEV: 0
-  SKIP_DEV_SELENIUM: 0
   SKIP_NO_DRUPAL: 0
-  SKIP_NO_DRUPAL_SELENIUM: 0
 
 .docker_login_hub:
   - &docker_login_hub docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
@@ -82,6 +83,17 @@ stable:
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
 
+test:
+  stage: test
+  except:
+    variables:
+      - $SKIP_TEST == "1"
+  extends: .build_test_release
+  variables:
+    IMAGE: drupal8ci:${DRUPAL_CURRENT_TEST}-drupal
+    DIR: '${DRUPAL_CURRENT_TEST}/drupal'
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-drupal
+
 dev:
   stage: dev
   except:
@@ -91,7 +103,7 @@ dev:
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-drupal
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
-    IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-drupal
 
 .no_drupal:
   script:
@@ -102,17 +114,21 @@ dev:
     # Test
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
     # Push to Gitlab registry for all versions.
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
     # Login to Docker hub.
     - *docker_login_hub
     # Tag for Docker hub and push for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
     - docker images
     - if [ ${CI_DO_RELEASE} == 1 ]; then
         docker push $RELEASE_IMAGE/$IMAGE;
+        docker push $RELEASE_IMAGE/$IMAGE_TEST;
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
       fi
 
@@ -124,6 +140,7 @@ no-drupal:
   extends: .no_drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
+    IMAGE_TEST: drupal8ci:${DRUPAL_CURRENT_TEST}-no-drupal
     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
