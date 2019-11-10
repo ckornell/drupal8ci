@@ -63,7 +63,11 @@ stable:
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
     EXTRA_IMAGE: composer:latest
 
-.build_test_release:
+dev:
+  stage: dev
+  except:
+    variables:
+      - $SKIP_DEV == "1"
   script:
     # Make sure we are using Gitlab image.
     - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
@@ -81,19 +85,16 @@ stable:
     - if [ ${CI_DO_RELEASE} == 1 ]; then
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
-
-dev:
-  stage: dev
-  except:
-    variables:
-      - $SKIP_DEV == "1"
-  extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-drupal
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
 
-.no_drupal:
+no-drupal:
+  stage: no drupal
+  except:
+    variables:
+      - $SKIP_NO_DRUPAL == "1"
   script:
     # Make sure we are using Gitlab image.
     - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
@@ -115,13 +116,6 @@ dev:
         docker push $RELEASE_IMAGE/$IMAGE;
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
       fi
-
-no-drupal:
-  stage: no drupal
-  except:
-    variables:
-      - $SKIP_NO_DRUPAL == "1"
-  extends: .no_drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
