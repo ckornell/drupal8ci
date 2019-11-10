@@ -80,13 +80,6 @@ else
   __error=1
 fi
 
-if [ -x "$(command -v phpunit)" ]; then
-  phpunit --version | grep 'PHPUnit'
-else
-  printf "%sPhpunit missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
 if [ -x "$(command -v google-chrome)" ]; then
   google-chrome --version
 else
@@ -98,6 +91,23 @@ if [ -x "$(command -v chromedriver)" ]; then
   chromedriver --version
 else
   printf "%sChromedriver missing!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+# Get and compare Chrome and Chromedriver versions.
+__chrome_version=($(google-chrome --version))
+__chrome_version=${__chrome_version[2]}
+__chromedriver_version=($(chromedriver --version))
+__chromedriver_version=${__chromedriver_version[1]}
+if [[ $__chromedriver_version != $__chrome_version ]]; then
+  printf "%sChrome and Chromedriver versions mistmatch!%s\\n" "${red}" "${end}"
+  __error=1
+fi
+
+if [ -x "$(command -v drush)" ]; then
+  drush --version
+else
+  printf "%sDrush missing!%s\\n" "${red}" "${end}"
   __error=1
 fi
 
