@@ -93,7 +93,6 @@ RUN composer run-script drupal-phpunit-upgrade --no-ansi \
 USER root
 
 COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests.sh
-COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests-extra.sh
 COPY --chown=chromeuser:chromeuser start-chromedriver.sh /scripts/start-chromedriver.sh
 COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
 
