@@ -97,8 +97,12 @@ fi
 # Get and compare Chrome and Chromedriver versions.
 __chrome_version=($(google-chrome --version))
 __chrome_version=${__chrome_version[2]}
+__chrome_version=(${__chrome_version//./ })
+__chrome_version=${__chrome_version[0]}
 __chromedriver_version=($(chromedriver --version))
 __chromedriver_version=${__chromedriver_version[1]}
+__chromedriver_version=(${__chromedriver_version//./ })
+__chromedriver_version=${__chromedriver_version[0]}
 if [[ $__chromedriver_version != $__chrome_version ]]; then
   printf "%sChrome and Chromedriver versions mistmatch!%s\\n" "${red}" "${end}"
   __error=1
