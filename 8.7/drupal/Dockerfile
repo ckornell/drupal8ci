@@ -48,7 +48,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
 #==================
 # Chromedriver latest stable release.
 # http://chromedriver.chromium.org/downloads/version-selection
-RUN CHROME_DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
+RUN export CHROME_DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
   && curl -fsSL https://chromedriver.storage.googleapis.com//chromedriver_linux64.zip \
     -o /tmp/chromedriver_linux64.zip \
   && unzip /tmp/chromedriver_linux64.zip -d /opt \
