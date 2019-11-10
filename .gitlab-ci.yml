@@ -126,4 +126,4 @@ no-drupal:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
