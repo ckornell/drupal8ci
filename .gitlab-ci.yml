@@ -114,21 +114,21 @@ dev:
     # Test
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
     # Push to Gitlab registry for all versions.
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST
+    # - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST
+    # - docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
     # Login to Docker hub.
     - *docker_login_hub
     # Tag for Docker hub and push for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST
+    # - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
     - docker images
     - if [ ${CI_DO_RELEASE} == 1 ]; then
         docker push $RELEASE_IMAGE/$IMAGE;
-        docker push $RELEASE_IMAGE/$IMAGE_TEST;
+        # docker push $RELEASE_IMAGE/$IMAGE_TEST;
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
       fi
 
