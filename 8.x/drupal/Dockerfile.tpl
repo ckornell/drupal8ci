@@ -77,16 +77,6 @@ RUN composer install --no-ansi -n --profile --no-suggest \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*
 
-#==================
-# [TEMPORARY] Drupal 8.7 only.
-# Install Drupal dev and PHP 7 update for PHPunit, see
-# https://github.com/drupal/drupal/blob/8.7.x/composer.json#L56
-
-WORKDIR /var/www/html
-
-RUN composer run-script drupal-phpunit-upgrade --no-ansi \
-  && composer clear-cache
-
 # Manage final tasks.
 USER root
 

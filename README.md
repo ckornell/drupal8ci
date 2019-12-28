@@ -32,9 +32,9 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 ## Basic usage (local)
 
-The default image `8.7-drupal` include Drupal core with Google Chrome.
+The default image `8.8-drupal` include Drupal core with Google Chrome.
 
-Tag `8.8-drupal` rely on current Drupal `8.8.0-rc1` version.
+Tag `8.7-drupal` rely on current Drupal `8.7.x` version.
 
 Tag `8.9-drupal` rely on current Drupal `8.9.x-dev` version.
 
