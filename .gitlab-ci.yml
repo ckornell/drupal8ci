@@ -7,7 +7,7 @@ stages:
   # Stable version.
   - stable
   # Transition version, alpha, beta, rc...
-  # - test
+  - test
   # Dev version.
   - dev
   # No Drupal versions are the same for all.
@@ -23,7 +23,7 @@ variables:
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
   CI_DO_RELEASE: 1
   SKIP_STABLE: 0
-  SKIP_TEST: 0
+  SKIP_TEST: 1
   SKIP_DEV: 0
   SKIP_NO_DRUPAL: 0
 
@@ -83,7 +83,7 @@ stable:
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
 
-.test:
+test:
   stage: test
   except:
     variables:
