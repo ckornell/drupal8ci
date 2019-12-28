@@ -7,14 +7,14 @@ stages:
   # Stable version.
   - stable
   # Transition version, alpha, beta, rc...
-  - test
+  # - test
   # Dev version.
   - dev
   # No Drupal versions are the same for all.
   - no drupal
 
 variables:
-  DRUPAL_CURRENT_STABLE: '8.7'
+  DRUPAL_CURRENT_STABLE: '8.8'
   DRUPAL_CURRENT_TEST: '8.8'
   DRUPAL_CURRENT_DEV: '8.9'
   DOCKER_HOST: tcp://docker:2375
@@ -83,7 +83,7 @@ stable:
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
 
-test:
+.test:
   stage: test
   except:
     variables:
@@ -140,7 +140,7 @@ no-drupal:
   extends: .no_drupal
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
-    IMAGE_TEST: drupal8ci:${DRUPAL_CURRENT_TEST}-no-drupal
+    # IMAGE_TEST: drupal8ci:${DRUPAL_CURRENT_TEST}-no-drupal
     IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
