@@ -39,8 +39,7 @@ define file_prepare
 endef
 
 define file_prepare_dev
-	@cp -r ./${STABLE_TPL}/ ./$(1)/;
-	@rm -f "./$(1)/drupal/Dockerfile.tpl";
+	@cp -r ./${DEV_TPL}/ ./$(1)/;
 	@cp -r ./${DEV_TPL}/drupal/Dockerfile.tpl ./$(1)/drupal/Dockerfile.tpl;
 	@DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";

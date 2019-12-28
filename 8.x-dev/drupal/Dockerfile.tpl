@@ -2,8 +2,11 @@ FROM mogtofu33/drupal8ci:$DRUPAL_TAG-drupal
 
 LABEL maintainer="dev-drupal.com"
 
+WORKDIR /var/www
+
 # Remove the Drupal project that comes with the parent image.
-RUN rm -rf ..?* .[!.]* *
+RUN rm -rf /var/www/html \
+  && mkdir -p /var/www/html
 
 WORKDIR /var/www/html
 
