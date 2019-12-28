@@ -9,20 +9,15 @@ RUN set -eux; \
   curl -fSL "https://ftp.drupal.org/files/projects/drupal-${DRUPAL_DOWNLOAD_TAG}.tar.gz" -o drupal.tar.gz; \
   tar -xz --strip-components=1 -f drupal.tar.gz; \
   rm drupal.tar.gz; \
-  chown -R www-data:www-data sites modules themes
+  chown -R www-data:www-data sites modules themes profiles
 
 # Composer install for dev
 RUN mkdir -p /var/www/html/vendor \
   && chown -R www-data:www-data /var/www/html/vendor
 
-WORKDIR /var/www/html
-
-################################################################################
-# TEMPORARY - Scaffold permission issue
-RUN rm -f /var/www/html/profiles/README.txt
-################################################################################
-
 USER www-data
+
+WORKDIR /var/www/html
 
 RUN composer install --no-suggest --prefer-dist --no-interaction --no-ansi \
   && composer clear-cache
