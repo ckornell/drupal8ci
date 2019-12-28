@@ -15,9 +15,14 @@ RUN set -eux; \
 RUN mkdir -p /var/www/html/vendor \
   && chown -R www-data:www-data /var/www/html/vendor
 
-USER www-data
-
 WORKDIR /var/www/html
+
+################################################################################
+# TEMPORARY - Scaffold permission issue
+RUN rm -f /var/www/html/profiles/README.txt
+################################################################################
+
+USER www-data
 
 RUN composer install --no-suggest --prefer-dist --no-interaction --no-ansi \
   && composer clear-cache
