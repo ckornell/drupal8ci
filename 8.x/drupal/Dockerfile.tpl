@@ -64,7 +64,8 @@ COPY --chown=www-data:www-data composer.json /var/www/.composer/composer.json
 
 RUN mkdir -p /var/www/.composer /var/www/html/vendor/bin/ \
   && chmod 777 /var/www \
-  && chown -R www-data:www-data /var/www/.composer /var/www/html/vendor /var/www/html/composer.*
+  && chown -R www-data:www-data /var/www/.composer /var/www/html/vendor \
+  /var/www/html/composer.* /var/www/html/profiles /var/www/html/autoload.php
 
 # Manage Composer.
 WORKDIR /var/www/.composer
@@ -72,7 +73,13 @@ WORKDIR /var/www/.composer
 USER www-data
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
-# Install Drupal dev third party and upgrade Php-unit.
+RUN composer install --no-ansi -n --profile --no-suggest \
+  && composer clear-cache \
+  && rm -rf /var/www/.composer/cache/*
+
+WORKDIR /var/www/html
+
+# Install Drupal dev third party and Phpunit.
 RUN composer install --no-ansi -n --profile --no-suggest \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*
