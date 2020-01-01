@@ -16,14 +16,8 @@ RUN set -eux; \
   rm drupal.tar.gz; \
   chown -R www-data:www-data /var/www/html
 
-# Composer install for dev
 RUN mkdir -p /var/www/html/vendor \
   && chown -R www-data:www-data /var/www/html/vendor
-
-USER www-data
-
-RUN composer install --no-suggest --prefer-dist --no-interaction --no-ansi \
-  && composer clear-cache
 
 USER root
 
