@@ -8,23 +8,12 @@
         "hirak/prestissimo": "^0.3.8",
         "edgedesign/phpqa": "^1.23",
         "consolidation/robo": "^1.4",
-        "drupal/coder": "^8.3",
         "drush/drush": "^9.7",
         "jakub-onderka/php-parallel-lint": "^1.0",
         "jakub-onderka/php-console-highlighter": "^0.4.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
         "sensiolabs/security-checker": "^6.0",
         "twig/twig": "^1",
-        "mikey179/vfsstream": "^1.6.8",
-        "phpunit/phpunit": "^6.5 || ^7",
-        "phpspec/prophecy": "^1.7",
-        "symfony/css-selector": "^3.4.0",
-        "symfony/phpunit-bridge": "^3.4.3",
-        "symfony/debug": "^3.4.0",
-        "justinrainbow/json-schema": "^5.2",
-        "symfony/filesystem": "~3.4.0",
-        "symfony/finder": "~3.4.0",
-        "symfony/lock": "~3.4.0",
-        "symfony/browser-kit": "^3.4.0"
+        "drupal/core-dev": "^$DRUPAL_TAG"
     }
 }

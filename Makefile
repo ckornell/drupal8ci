@@ -35,9 +35,11 @@ endef
 define file_prepare
 	@echo "Prepare $(1) from ${STABLE_TPL}..."
 	@cp -r ./${STABLE_TPL}/ ./$(1)/;
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_TAG="$(1)" envsubst < "./$(STABLE_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_TAG="$(1)" envsubst < "./$(STABLE_TPL)/drupal/composer.json" > "./$(1)/drupal/composer.json";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
+	@rm -f "./$(1)/drupal/composer.tpl";
+	@DRUPAL_TAG="$(1)" envsubst < "./$(STABLE_TPL)/no-drupal/Dockerfile" > "./$(1)/no-drupal/Dockerfile";
 	@rm -f "./$(1)/no-drupal/Dockerfile.tpl";
 	@echo "...Done!"
 endef
@@ -45,8 +47,7 @@ endef
 define file_prepare_dev
 	@echo "Prepare $(1) from ${DEV_TPL}..."
 	@cp -r ./${DEV_TPL}/ ./$(1)/;
-	@cp -r ./${DEV_TPL}/drupal/Dockerfile.tpl ./$(1)/drupal/Dockerfile.tpl;
-	@DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(DEV_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@echo "...Done!"
 endef
