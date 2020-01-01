@@ -73,22 +73,19 @@ RUN mkdir -p /var/www/.composer \
 
 USER www-data
 
-RUN composer create-project drupal/recommended-project html --no-interaction --no-ansi
+RUN composer create-project drupal/recommended-project html --no-interaction --no-ansi \
+  && composer clear-cache \
+  && rm -rf /var/www/.composer/cache/*
 
 # Manage Composer.
 WORKDIR /var/www/.composer
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
-RUN composer install --no-ansi -n --profile --no-suggest \
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-ansi -n --profile --no-suggest \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*
 
 WORKDIR /var/www/html
-
-# Install Drupal dev third party and Phpunit.
-# RUN composer install --no-ansi -n --profile --no-suggest \
-#   && composer clear-cache \
-#   && rm -rf /var/www/.composer/cache/*
 
 # Manage final tasks.
 USER root
