@@ -62,15 +62,21 @@ RUN curl -fsSL https://chromedriver.storage.googleapis.com/$(curl -s https://chr
 COPY --chown=www-data:www-data --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY --chown=www-data:www-data composer.json /var/www/.composer/composer.json
 
-RUN mkdir -p /var/www/.composer /var/www/html/vendor/bin/ \
+WORKDIR /var/www
+
+# Remove the Drupal project that comes with the parent image.
+RUN rm -rf /var/www/html
+
+RUN mkdir -p /var/www/.composer \
   && chmod 777 /var/www \
-  && chown -R www-data:www-data /var/www/.composer /var/www/html/vendor \
-  /var/www/html/composer.* /var/www/html/profiles /var/www/html/autoload.php
+  && chown -R www-data:www-data /var/www
+
+USER www-data
+
+RUN composer create-project drupal/recommended-project html --no-interaction --no-ansi
 
 # Manage Composer.
 WORKDIR /var/www/.composer
-
-USER www-data
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
 RUN composer install --no-ansi -n --profile --no-suggest \
@@ -80,9 +86,9 @@ RUN composer install --no-ansi -n --profile --no-suggest \
 WORKDIR /var/www/html
 
 # Install Drupal dev third party and Phpunit.
-RUN composer install --no-ansi -n --profile --no-suggest \
-  && composer clear-cache \
-  && rm -rf /var/www/.composer/cache/*
+# RUN composer install --no-ansi -n --profile --no-suggest \
+#   && composer clear-cache \
+#   && rm -rf /var/www/.composer/cache/*
 
 # Manage final tasks.
 USER root
@@ -93,9 +99,9 @@ COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
 
 RUN chmod +x /scripts/*.sh \
   # Symlink binaries.
-  && ln -sf /var/www/html/vendor/bin/* /usr/local/bin \
+  # && ln -sf /var/www/html/vendor/bin/* /usr/local/bin \
   && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
-  && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
+  # && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   # Remove Apache logs to stdout from the php image (used by Drupal image).
   && rm -f /var/log/apache2/access.log \
   # Fix Php performances.
