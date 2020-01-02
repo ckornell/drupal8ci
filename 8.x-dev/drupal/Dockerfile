@@ -11,8 +11,10 @@ USER www-data
 
 # Upgrade Drupal version to last dev.
 RUN composer create-project drupal/recommended-project:$DRUPAL_DOWNLOAD_TAG html --no-interaction --no-ansi \
-  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
-  && composer clear-cache \
-  && rm -rf /var/www/.composer/cache/*
+  && composer clear-cache
 
 WORKDIR /var/www/html
+
+RUN composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
+  && composer clear-cache \
+  && rm -rf /var/www/.composer/cache/*
