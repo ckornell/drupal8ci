@@ -17,6 +17,6 @@ WORKDIR /var/www/html
 
 RUN composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
   && composer clear-cache \
-  && rm -rf /var/www/.composer/cache/* \
-  # Add ww-data to sudoers to be able to use sudo -u www-data
-  && sudo usermod -aG sudo,adm www-data
+  && rm -rf /var/www/.composer/cache/*
+
+USER root
