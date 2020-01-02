@@ -96,9 +96,7 @@ COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
 
 RUN chmod +x /scripts/*.sh \
   # Symlink binaries.
-  # && ln -sf /var/www/html/vendor/bin/* /usr/local/bin \
   && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
-  # && ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/ \
   # Remove Apache logs to stdout from the php image (used by Drupal image).
   && rm -f /var/log/apache2/access.log \
   # Fix Php performances.
