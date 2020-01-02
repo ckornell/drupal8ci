@@ -106,6 +106,9 @@ RUN chmod +x /scripts/*.sh \
   && sed -i "s#memory_limit = 128M#memory_limit = 2048M#g" /usr/local/etc/php/php.ini \
   && sed -i "s#max_execution_time = 30#max_execution_time = 90#g" /usr/local/etc/php/php.ini \
   && sed -i "s#;max_input_nesting_level = 64#max_input_nesting_level = 512#g" /usr/local/etc/php/php.ini \
+  # Fix Apache DocumentRoot.
+  && sed -ri -e 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/web!g' /etc/apache2/sites-available/*.conf \
+  && sed -ri -e 's!DocumentRoot /var/www!DocumentRoot /var/www/html/web!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
   # Convenient alias.
   && echo "alias ls='ls --color=auto -lAh'" >> /root/.bashrc \
   && echo "alias l='ls --color=auto -lAh'" >> /root/.bashrc \

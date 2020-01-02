@@ -5,20 +5,14 @@ LABEL maintainer="dev-drupal.com"
 WORKDIR /var/www
 
 # Remove the Drupal project that comes with the parent image.
-RUN rm -rf /var/www/html \
-  && mkdir -p /var/www/html
+RUN rm -rf /var/www/html
+
+USER www-data
+
+# Upgrade Drupal version to last dev.
+RUN composer create-project drupal/recommended-project:$DRUPAL_DOWNLOAD_TAG html --no-interaction --no-ansi \
+  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
+  && composer clear-cache \
+  && rm -rf /var/www/.composer/cache/*
 
 WORKDIR /var/www/html
-
-RUN set -eux; \
-  curl -fSL "https://ftp.drupal.org/files/projects/drupal-8.9.x-dev.tar.gz" -o drupal.tar.gz; \
-  tar -xz --strip-components=1 -f drupal.tar.gz; \
-  rm drupal.tar.gz; \
-  chown -R www-data:www-data /var/www/html
-
-RUN mkdir -p /var/www/html/vendor \
-  && chown -R www-data:www-data /var/www/html/vendor
-
-USER root
-
-RUN ln -sf /var/www/.composer/vendor/bin/* /var/www/html/vendor/bin/

@@ -13,7 +13,3 @@ RUN rm -rf /var/www/html \
   && chown -R www-data:www-data /var/www/html
 
 WORKDIR /var/www/html
-
-# Change docroot since we use Composer Drupal project.
-RUN sed -ri -e 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/web!g' /etc/apache2/sites-available/*.conf \
-  && sed -ri -e 's!DocumentRoot /var/www!DocumentRoot /var/www/html/web!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
