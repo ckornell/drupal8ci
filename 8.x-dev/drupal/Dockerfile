@@ -19,4 +19,4 @@ RUN composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-depende
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/* \
   # Add ww-data to sudoers to be able to use sudo -u www-data
-  && usermod -aG sudo,adm www-data
+  && sudo usermod -aG sudo,adm www-data
