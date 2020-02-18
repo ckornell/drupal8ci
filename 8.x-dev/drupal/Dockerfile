@@ -13,3 +13,5 @@ RUN composer create-project drupal/recommended-project:${DRUPAL_DOWNLOAD_TAG} /v
   && ls -lAh /var/www/html
 
 USER root
+
+VOLUME /var/www/html

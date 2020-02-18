@@ -108,5 +108,3 @@ RUN chmod +x /scripts/*.sh \
   && chown www-data:www-data /var/www/.bashrc
 
 EXPOSE 80 4444 9515 9222
-
-VOLUME /var/www/html

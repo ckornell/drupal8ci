@@ -15,3 +15,5 @@ RUN composer create-project drupal/recommended-project /var/www/html --no-intera
   && ls -lAh /var/www/html
 
 USER root
+
+VOLUME /var/www/html

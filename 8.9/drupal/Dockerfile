@@ -13,3 +13,5 @@ RUN composer create-project drupal/recommended-project:8.9.x-dev /var/www/html -
   && ls -lAh /var/www/html
 
 USER root
+
+VOLUME /var/www/html
