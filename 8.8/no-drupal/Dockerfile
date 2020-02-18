@@ -4,8 +4,6 @@ FROM drupal:8.8-apache
 
 LABEL maintainer="dev-drupal.com"
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html/web
-
 # Remove the Drupal project that comes with the parent image.
 RUN rm -rf ..?* .[!.]* *
 
@@ -99,8 +97,8 @@ RUN chmod +x /scripts/*.sh \
   && sed -i "s#max_execution_time = 30#max_execution_time = 90#g" /usr/local/etc/php/php.ini \
   && sed -i "s#;max_input_nesting_level = 64#max_input_nesting_level = 512#g" /usr/local/etc/php/php.ini \
   # Fix Apache DocumentRoot.
-  && sed -ri -e 's!DocumentRoot /var/www/html!DocumentRoot !g' /etc/apache2/sites-available/*.conf \
-  && sed -ri -e 's!DocumentRoot /var/www!DocumentRoot !g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+  && sed -ri -e 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/web!g' /etc/apache2/sites-available/*.conf \
+  && sed -ri -e 's!DocumentRoot /var/www!DocumentRoot /var/www/html/web!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
   # Convenient alias for root and www-data.
   && echo "alias ls='ls --color=auto -lAh'" >> /root/.bashrc \
   && echo "alias l='ls --color=auto -lAh'" >> /root/.bashrc \
