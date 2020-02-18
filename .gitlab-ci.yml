@@ -26,17 +26,14 @@ variables:
   SKIP_CURRENT: 0
   SKIP_TEST: 1
   SKIP_DEV: 0
-
-.docker_login_hub:
-  - &docker_login_hub docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
+  EXTRA_IMAGE: 0
 
 before_script:
-  - echo "Working on ${IMAGE_BASE}"
   # Pull base image from Docker hub.
   - docker pull $IMAGE_BASE || true
+  - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull $EXTRA_IMAGE || true; fi
   # Login to Gitlab and pull current image if exist.
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  - echo "Working on ${CI_REGISTRY_IMAGE}/${IMAGE}"
   - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
 
 base:
@@ -45,7 +42,6 @@ base:
     variables:
       - $SKIP_BASE == "1"
   script:
-    - docker pull $EXTRA_IMAGE
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
@@ -56,14 +52,14 @@ base:
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TEST ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
-    # Login to Docker hub.
-    - *docker_login_hub
     # Tag for Docker hub and push all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TEST ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST; fi
     - docker images
+    # Login and push to Docker hub.
     - if [ ${CI_DO_RELEASE} == 1 ]; then
+        docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY;
         docker push $RELEASE_IMAGE/$IMAGE;
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
         if [ ! $SKIP_TEST ]; then push $RELEASE_IMAGE/$IMAGE_TEST; fi
@@ -78,25 +74,19 @@ base:
 
 .build_test_release:
   script:
-    # Make sure we are using Gitlab image.
-    - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
-    - cat ${CI_PROJECT_DIR}/$DIR/Dockerfile
+    # Make sure we are using Gitlab image as base.
+    - sed -i "s#FROM mogtofu33/drupal8ci#FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
     # Build the image from cache.
-    - echo "docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR"
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
-    - echo "docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh"
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
     # Push to Gitlab registry for next steps.
-    - echo "docker push $CI_REGISTRY_IMAGE/$IMAGE"
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
-    # Login to Docker hub.
-    - *docker_login_hub
     # Tag for Docker hub and push.
-    - echo "docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE"
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    - docker images
+    # Login to Docker hub and push.
     - if [ ${CI_DO_RELEASE} == 1 ]; then
+        docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY;
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
 
