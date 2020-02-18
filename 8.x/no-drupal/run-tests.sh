@@ -110,7 +110,9 @@ fi
 
 if [ -x "$(command -v drush)" ]; then
   drush --version
-  drush --root="/var/www/html" status --fields="drupal-version"
+  if [ -f "/var/www/html/composer.json" ]; then 
+    drush --root="/var/www/html" status --fields="drupal-version"
+  fi
 else
   printf "%sDrush missing!%s\\n" "${red}" "${end}"
   __error=1

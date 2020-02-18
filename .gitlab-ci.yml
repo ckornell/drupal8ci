@@ -4,17 +4,17 @@ services:
   - docker:dind
 
 stages:
-  # Stable version.
-  - stable
+  # Base image is no-drupal
+  - base
+  # Current version.
+  - current
   # Transition version, alpha, beta, rc...
   - test
   # Dev version.
   - dev
-  # No Drupal versions are the same for all.
-  - no drupal
 
 variables:
-  DRUPAL_CURRENT_STABLE: '8.8'
+  DRUPAL_CURRENT: '8.8'
   DRUPAL_CURRENT_TEST: '8.8'
   DRUPAL_CURRENT_DEV: '8.9'
   DOCKER_HOST: tcp://docker:2375
@@ -22,10 +22,10 @@ variables:
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
   CI_DO_RELEASE: 1
-  SKIP_STABLE: 0
+  SKIP_BASE: 0
+  SKIP_CURRENT: 0
   SKIP_TEST: 1
   SKIP_DEV: 0
-  SKIP_NO_DRUPAL: 0
 
 .docker_login_hub:
   - &docker_login_hub docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
@@ -37,31 +37,41 @@ before_script:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
 
-stable:
-  stage: stable
+base:
+  stage: base
   except:
     variables:
-      - $SKIP_STABLE == "1"
+      - $SKIP_BASE == "1"
   script:
     - docker pull $EXTRA_IMAGE
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
-    # Push to Gitlab registry.
+    # Push to Gitlab registry for all versions.
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
+    - if [ ! $SKIP_TEST ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
+    - if [ ! $SKIP_TEST ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     # Login to Docker hub.
     - *docker_login_hub
-    # Tag for Docker hub and push.
+    # Tag for Docker hub and push all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
+    - if [ ! $SKIP_TEST ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST; fi
     - docker images
     - if [ ${CI_DO_RELEASE} == 1 ]; then
         docker push $RELEASE_IMAGE/$IMAGE;
+        docker push $RELEASE_IMAGE/$IMAGE_DEV;
+        if [ ! $SKIP_TEST ]; then push $RELEASE_IMAGE/$IMAGE_TEST; fi
       fi
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-drupal
-    DIR: '${DRUPAL_CURRENT_STABLE}/drupal'
-    IMAGE_BASE: drupal:${DRUPAL_CURRENT_STABLE}-apache
+    IMAGE: drupal8ci:${DRUPAL_CURRENT}-no-drupal
+    IMAGE_TEST: drupal8ci:${DRUPAL_CURRENT_TEST}-no-drupal
+    IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
+    DIR: '${DRUPAL_CURRENT}/no-drupal'
+    IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
     EXTRA_IMAGE: composer:latest
 
 .build_test_release:
@@ -83,6 +93,17 @@ stable:
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
 
+current:
+  stage: current
+  except:
+    variables:
+      - $SKIP_CURRENT == "1"
+  extends: .build_test_release
+  variables:
+    IMAGE: drupal8ci:${DRUPAL_CURRENT_TEST}-drupal
+    DIR: '${DRUPAL_CURRENT_TEST}/drupal'
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
+
 test:
   stage: test
   except:
@@ -92,7 +113,7 @@ test:
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_TEST}-drupal
     DIR: '${DRUPAL_CURRENT_TEST}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-drupal
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
 
 dev:
   stage: dev
@@ -103,40 +124,4 @@ dev:
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-drupal
     DIR: '${DRUPAL_CURRENT_DEV}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}-drupal
-
-.no_drupal:
-  script:
-    # Make sure we are using Gitlab image.
-    - sed -i "s#FROM mogtofu33/drupal8ci# FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
-    # Build the image from cache.
-    - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
-    # Test
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh
-    # Push to Gitlab registry for all versions.
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    # Login to Docker hub.
-    - *docker_login_hub
-    # Tag for Docker hub and push for all versions.
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
-    - docker images
-    - if [ ${CI_DO_RELEASE} == 1 ]; then
-        docker push $RELEASE_IMAGE/$IMAGE;
-        docker push $RELEASE_IMAGE/$IMAGE_DEV;
-      fi
-
-no-drupal:
-  stage: no drupal
-  except:
-    variables:
-      - $SKIP_NO_DRUPAL == "1"
-  extends: .no_drupal
-  variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_STABLE}-no-drupal
-    # IMAGE_TEST: drupal8ci:${DRUPAL_CURRENT_TEST}-no-drupal
-    IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
-    DIR: '${DRUPAL_CURRENT_STABLE}/no-drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT_STABLE}
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal

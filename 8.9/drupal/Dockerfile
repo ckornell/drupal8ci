@@ -1,21 +1,13 @@
-FROM mogtofu33/drupal8ci:8.8-drupal
+FROM mogtofu33/drupal8ci:8.8-no-drupal
 
 LABEL maintainer="dev-drupal.com"
-
-WORKDIR /var/www
-
-# Remove the Drupal project that comes with the parent image.
-RUN rm -rf /var/www/html
 
 USER www-data
 
 # Upgrade Drupal version to last dev.
-RUN composer create-project drupal/recommended-project:8.9.x-dev html --no-interaction --no-ansi \
-  && composer clear-cache
-
-WORKDIR /var/www/html
-
-RUN composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
+RUN composer create-project drupal/recommended-project:8.9.x-dev /var/www/html --no-interaction --no-ansi \
+  && composer require drupal/core-dev:^8.9 --no-interaction --no-ansi --no-suggest \
+  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*
 

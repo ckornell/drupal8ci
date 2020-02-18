@@ -8,7 +8,7 @@
 
 ## Details
 
-[Drupal 8](https://www.drupal.org/8) ci image with all Php / Node tools needed for CI or Local Build/Tests/Lint.
+[Drupal 8](https://www.drupal.org/8) ci image with a lot of Php/NodeJs tools needed for CI or Local Build/Tests/Lint.
 
 Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
@@ -32,15 +32,13 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 ## Basic usage (local)
 
-The default image `8.8-drupal` include Drupal core with Google Chrome.
-
-Tag `8.7-drupal` rely on current Drupal `8.7.x` version.
+The default image `8.8-drupal` include Drupal core managed by Composer with Google Chrome.
 
 Tag `8.9-drupal` rely on current Drupal `8.9.x-dev` version.
 
-Variants `no-drupal` are used for a project including a Drupal template from a `composer.json` and are all the same.
+Base images `no-drupal` are used for a project including a Drupal template from a `composer.json` and are all the same.
 
-To use with a local Drupal 8 managed by composer, mount your Drupal on `/var/www/html`
+To use with a local Drupal 8 managed by Composer, mount your Drupal on `/var/www/html`
 
 ## Build
 
@@ -49,19 +47,15 @@ CI variable `CI_DO_RELEASE`, default to `1` to push to Docker hub.
 Other variables to skip jobs:
 
 ```bash
-SKIP_STABLE              0
+SKIP_BASE                0
+SKIP_CURRENT             0
 SKIP_TEST                0
 SKIP_DEV                 0
-SKIP_NO_DRUPAL           0
 ```
 
 ```bash
-# Local build and tests with no push to Docker hub.
-make dry-release
-# Local push from previous build.
-make push-release
-# All in one build and push.
-make release
+# 8.x and 8.x-dev are template files, can generate the files with:
+make prepare
 ```
 
 ----
