@@ -110,12 +110,13 @@ fi
 
 if [ -f "/var/www/html/vendor/bin/drush" ]; then
   /var/www/html/vendor/bin/drush --version
+  # Print Drupal version.
   if [ -f "/var/www/html/composer.json" ]; then 
     /var/www/html/vendor/bin/drush --root="/var/www/html" status --fields="drupal-version"
   fi
 else
-  printf "%sDrush missing!%s\\n" "${red}" "${end}"
-  __error=1
+  # Silent fail because Drush is not installed in the no-drupal variant.
+  printf "[NOTICE] Drush not found!\\n"
 fi
 
 printf "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
