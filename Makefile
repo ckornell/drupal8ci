@@ -5,7 +5,8 @@ DRUPAL_CURRENT_TEST=8.9
 DRUPAL_CURRENT_TEST_RELEASE=8.9.0-beta2
 
 STABLE_TPL=tpl/8.x
-DEV_TPL=tpl/8.x-dev
+TEST_TPL=tpl/8.x-dev
+DEV_TPL=tpl/9.x
 
 define prepare
 	@echo "Prepare $(1) from ${STABLE_TPL}..."
@@ -19,7 +20,15 @@ endef
 define prepare_dev
 	@echo "Prepare $(1) from ${DEV_TPL}..."
 	@cp -r ./${DEV_TPL}/ ./$(1)/;
-	@DRUPAL_CURRENT_DEV="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(DEV_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_CURRENT_DEV="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(DEV_TPL)/Dockerfile" > "./$(1)/Dockerfile";
+	@rm -f "./$(1)/Dockerfile.tpl";
+	@echo "...Done!"
+endef
+
+define prepare_test
+	@echo "Prepare $(1) from ${TEST_TPL}..."
+	@cp -r ./${TEST_TPL}/ ./$(1)/;
+	@DRUPAL_CURRENT_DEV="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(TEST_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@echo "...Done!"
 endef
@@ -36,7 +45,7 @@ files_prepare:
 ifeq "${DRUPAL_CURRENT_TEST}" ""
 	@echo "[[ Skipping test ]]"
 else
-	$(call prepare_dev,${DRUPAL_CURRENT_TEST},${DRUPAL_CURRENT_TEST_RELEASE},${DRUPAL_CURRENT_STABLE})
+	$(call prepare_test,${DRUPAL_CURRENT_TEST},${DRUPAL_CURRENT_TEST_RELEASE},${DRUPAL_CURRENT_STABLE})
 endif
 
 files_clean:
