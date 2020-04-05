@@ -6,11 +6,12 @@ USER www-data
 
 # Upgrade Drupal version to last dev.
 RUN composer create-project drupal/recommended-project:8.9.0-beta2 /var/www/html --no-interaction --no-ansi \
-  && composer require drupal/core-dev:^8.9 --working-dir=/var/www/html --no-interaction --no-ansi --no-suggest \
-  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
+  && composer require drupal/core-dev:^ --working-dir=/var/www/html --no-interaction --no-ansi --no-suggest \
+  # Add Drush to the project.
+  && composer require drush/drush:^10 --working-dir=/var/www/html --no-interaction --no-ansi --no-suggest \
+  && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --working-dir=/var/www/html --with-dependencies --no-progress \
   && composer clear-cache \
-  && rm -rf /var/www/.composer/cache/* \
-  && ls -lAh /var/www/html
+  && rm -rf /var/www/.composer/cache/*
 
 USER root
 

@@ -28,7 +28,7 @@ endef
 define prepare_test
 	@echo "Prepare $(1) from ${TEST_TPL}..."
 	@cp -r ./${TEST_TPL}/ ./$(1)/;
-	@DRUPAL_CURRENT_DEV="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(TEST_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
+	@DRUPAL_CURRENT_TEST="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(TEST_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
 	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@echo "...Done!"
 endef
