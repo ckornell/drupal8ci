@@ -15,8 +15,8 @@ stages:
 
 variables:
   DRUPAL_CURRENT: '8.8'
-  DRUPAL_CURRENT_TEST: '9.0'
-  DRUPAL_CURRENT_DEV: '8.9'
+  DRUPAL_TEST: '8.9'
+  DRUPAL_DEV: '9.0'
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   RELEASE_REGISTRY: docker.io
@@ -24,7 +24,7 @@ variables:
   CI_DO_RELEASE: 1
   SKIP_BASE: 0
   SKIP_CURRENT: 0
-  SKIP_TEST: 1
+  SKIP_TEST: 0
   SKIP_DEV: 0
   EXTRA_IMAGE: 0
 
@@ -66,8 +66,8 @@ base:
       fi
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT}-no-drupal
-    IMAGE_TEST: drupal8ci:${DRUPAL_CURRENT_TEST}-no-drupal
-    IMAGE_DEV: drupal8ci:${DRUPAL_CURRENT_DEV}-no-drupal
+    IMAGE_TEST: drupal8ci:${DRUPAL_TEST}-no-drupal
+    IMAGE_DEV: drupal8ci:${DRUPAL_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT}/no-drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
     EXTRA_IMAGE: composer:latest
@@ -97,8 +97,8 @@ current:
       - $SKIP_CURRENT == "1"
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_TEST}-drupal
-    DIR: '${DRUPAL_CURRENT_TEST}/drupal'
+    IMAGE: drupal8ci:${DRUPAL_TEST}-drupal
+    DIR: '${DRUPAL_TEST}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
 
 test:
@@ -108,8 +108,8 @@ test:
       - $SKIP_TEST == "1"
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_TEST}-drupal
-    DIR: '${DRUPAL_CURRENT_TEST}/drupal'
+    IMAGE: drupal8ci:${DRUPAL_TEST}-drupal
+    DIR: '${DRUPAL_TEST}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
 
 dev:
@@ -119,6 +119,6 @@ dev:
       - $SKIP_DEV == "1"
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT_DEV}-drupal
-    DIR: '${DRUPAL_CURRENT_DEV}/drupal'
+    IMAGE: drupal8ci:${DRUPAL_DEV}-drupal
+    DIR: '${DRUPAL_DEV}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
