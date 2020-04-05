@@ -108,10 +108,10 @@ if [[ $__chromedriver_version != $__chrome_version ]]; then
   __error=1
 fi
 
-if [ -x "$(command -v drush)" ]; then
-  drush --version
+if [ -f "/var/www/html/vendor/bin/drush" ]; then
+  /var/www/html/vendor/bin/drush --version
   if [ -f "/var/www/html/composer.json" ]; then 
-    drush --root="/var/www/html" status --fields="drupal-version"
+    /var/www/html/vendor/bin/drush --root="/var/www/html" status --fields="drupal-version"
   fi
 else
   printf "%sDrush missing!%s\\n" "${red}" "${end}"
