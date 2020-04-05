@@ -8,7 +8,7 @@ LABEL maintainer="dev-drupal.com"
 USER www-data
 
 # Add Drupal project with dev.
-RUN composer create-project drupal/recommended-project /var/www/html --no-interaction --no-ansi \
+RUN composer create-project drupal/recommended-project:^8.8 /var/www/html --no-interaction --no-ansi \
   && composer require drupal/core-dev:^8.8 --working-dir=/var/www/html --no-interaction --no-ansi --no-suggest \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/* \

@@ -34,7 +34,9 @@ Used with project [Gitlab CI Drupal](https://gitlab.com/mog33/gitlab-ci-drupal).
 
 The default image `8.8-drupal` include Drupal core managed by Composer with Google Chrome.
 
-Tag `8.9-drupal` rely on current Drupal `8.9.x-dev` version.
+Tag `8.9-drupal` rely on current Drupal `8.9.x-dev` latest tag (alpha, beta...) version.
+
+Tag `9.0-drupal` rely on current Drupal `9.0.x-dev` latest tag (alpha, beta...) version.
 
 Base images `no-drupal` are used for a project including a Drupal template from a `composer.json` and are all the same.
 

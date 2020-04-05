@@ -5,7 +5,7 @@ LABEL maintainer="dev-drupal.com"
 USER www-data
 
 # Upgrade Drupal version to last dev.
-RUN composer create-project drupal/recommended-project:8.9.x-dev /var/www/html --no-interaction --no-ansi \
+RUN composer create-project drupal/recommended-project:8.9.0-beta2 /var/www/html --no-interaction --no-ansi \
   && composer require drupal/core-dev:^8.9 --working-dir=/var/www/html --no-interaction --no-ansi --no-suggest \
   && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress \
   && composer clear-cache \

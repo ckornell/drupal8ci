@@ -15,7 +15,7 @@ stages:
 
 variables:
   DRUPAL_CURRENT: '8.8'
-  DRUPAL_CURRENT_TEST: '8.8'
+  DRUPAL_CURRENT_TEST: '9.0'
   DRUPAL_CURRENT_DEV: '8.9'
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
