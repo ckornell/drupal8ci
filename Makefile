@@ -20,8 +20,8 @@ endef
 define prepare_dev
 	@echo "Prepare $(1) from ${DEV_TPL}..."
 	@cp -r ./${DEV_TPL}/ ./$(1)/;
-	@DRUPAL_CURRENT_DEV="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(DEV_TPL)/Dockerfile" > "./$(1)/Dockerfile";
-	@rm -f "./$(1)/Dockerfile.tpl";
+	@DRUPAL_CURRENT_DEV="$(1)" DRUPAL_DOWNLOAD_TAG="$(2)" DRUPAL_TAG="$(3)" envsubst < "./$(DEV_TPL)/drupal/Dockerfile" > "./$(1)/drupal/Dockerfile";
+	@rm -f "./$(1)/drupal/Dockerfile.tpl";
 	@echo "...Done!"
 endef
 
