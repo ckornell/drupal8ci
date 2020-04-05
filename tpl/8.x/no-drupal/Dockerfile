@@ -1,6 +1,6 @@
 # https://hub.docker.com/r/juampynr/drupal8ci/~/dockerfile/
-# https://github.com/docker-library/drupal/blob/master/$DRUPAL_TAG/apache/Dockerfile
-FROM drupal:${DRUPAL_TAG}-apache
+# https://github.com/docker-library/drupal/blob/master/$IMAGE_TAG/apache/Dockerfile
+FROM drupal:${IMAGE_TAG}-apache
 
 LABEL maintainer="dev-drupal.com"
 
