@@ -11,9 +11,9 @@ default:
     - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
   artifacts:
     paths:
-      - /report.xml
+      - report.xml
     reports:
-      junit: /report.xml
+      junit: report.xml
 
 stages:
   # Base image is no-drupal
@@ -49,7 +49,7 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Tests
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report >> report.xml
     # - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh
     # Push to Gitlab registry for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
@@ -85,7 +85,7 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Tests
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report >> report.xml
     # - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
