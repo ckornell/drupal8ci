@@ -9,7 +9,7 @@ stages:
   # Current version.
   - current
   # Transition version, alpha, beta, rc...
-  - test
+  - transition
   # Dev version.
   - dev
 
@@ -24,7 +24,7 @@ variables:
   CI_DO_RELEASE: 1
   SKIP_BASE: 0
   SKIP_CURRENT: 0
-  SKIP_TEST: 0
+  SKIP_TRANSITION: 0
   SKIP_DEV: 0
   EXTRA_IMAGE: 0
 
@@ -48,21 +48,21 @@ base:
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh
     # Push to Gitlab registry for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if [ ! $SKIP_TEST ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+    - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if [ ! $SKIP_TEST ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+    - if [ ! $SKIP_TRANSITION ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     # Tag for Docker hub and push all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
-    - if [ ! $SKIP_TEST ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST; fi
+    - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST; fi
     - docker images
     # Login and push to Docker hub.
     - if [ ${CI_DO_RELEASE} == 1 ]; then
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY;
         docker push $RELEASE_IMAGE/$IMAGE;
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
-        if [ ! $SKIP_TEST ]; then push $RELEASE_IMAGE/$IMAGE_TEST; fi
+        if [ ! $SKIP_TRANSITION ]; then push $RELEASE_IMAGE/$IMAGE_TEST; fi
       fi
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT}-no-drupal
@@ -79,7 +79,7 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh > tests-${RELEASE_IMAGE}-${IMAGE}.log
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     # Tag for Docker hub and push.
@@ -89,6 +89,9 @@ base:
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY;
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
+  artifacts:
+    paths:
+      - '*.log'
 
 current:
   stage: current
@@ -101,11 +104,11 @@ current:
     DIR: '${DRUPAL_TEST}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
 
-test:
-  stage: test
+transition:
+  stage: transition
   except:
     variables:
-      - $SKIP_TEST == "1"
+      - $SKIP_TRANSITION == "1"
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_TEST}-drupal
