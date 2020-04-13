@@ -82,11 +82,10 @@ WORKDIR /var/www/html
 # Manage final tasks.
 USER root
 
-COPY --chown=www-data:www-data run-tests.sh /scripts/run-tests.sh
-COPY --chown=chromeuser:chromeuser start-chromedriver.sh /scripts/start-chromedriver.sh
-COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
+COPY --chown=www-data:www-data *.sh /usr/local/bin/
 
-RUN chmod +x /scripts/*.sh \
+RUN chmod +x /usr/local/bin/*.sh \
+  && chown chromeuser:chromeuser /usr/local/bin/*chrome*.sh \
   # Symlink binaries.
   && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
   # Remove Apache logs to stdout from the php image (used by Drupal image).
