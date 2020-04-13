@@ -11,7 +11,9 @@ default:
     - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
   artifacts:
     paths:
-      - '*.log'
+      - report.xml
+    reports:
+      junit: report.xml
 
 stages:
   # Base image is no-drupal
@@ -47,7 +49,7 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh > tests-${CI_JOB_NAME}.log
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh
     # Push to Gitlab registry for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
@@ -66,6 +68,7 @@ base:
         docker push $RELEASE_IMAGE/$IMAGE_DEV;
         if [ ! $SKIP_TRANSITION ]; then push $RELEASE_IMAGE/$IMAGE_TEST; fi
       fi
+
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT}-no-drupal
     IMAGE_TEST: drupal8ci:${DRUPAL_TEST}-no-drupal
@@ -81,7 +84,7 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh > tests-${CI_JOB_NAME}.log
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     # Tag for Docker hub and push.

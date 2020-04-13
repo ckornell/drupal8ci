@@ -82,11 +82,11 @@ WORKDIR /var/www/html
 # Manage final tasks.
 USER root
 
-COPY *.sh /scripts/
+COPY --chown=www-data:www-data run-tests.sh /
+COPY --chown=chromeuser:chromeuser start-chromedriver.sh /scripts/start-chromedriver.sh
+COPY --chown=chromeuser:chromeuser start-chrome.sh /scripts/start-chrome.sh
 
-RUN chmod +x /scripts/*.sh \
-  && chown www-data:www-data /scripts/*.sh \
-  && chown chromeuser:chromeuser /scripts/*chrome*.sh \
+RUN chmod +x /scripts/*.sh /run-tests.sh \
   && ln -sf /scripts/* /usr/local/bin \
   # Symlink binaries.
   && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \

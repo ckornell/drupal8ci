@@ -1,98 +1,37 @@
 #!/bin/bash
-set -e
+set -eu
 
-red=$'\e[1;31m'
-grn=$'\e[1;32m'
-end=$'\e[0m'
-__error=0
+# eval "$(curl -q -s https://raw.githubusercontent.com/coryb/osht/master/osht.sh)"
+eval "$(curl -q -s https://raw.githubusercontent.com/dcsobral/osht/bug/junitXML/osht.sh)"
 
-printf "\\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\\n"
+_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ -x "$(command -v php)" ]; then
-  php -v | grep built
-else
-  printf "%sPhp missing!%s\\n" "${red}" "${end}"
-  __error=1
+OSHT_JUNIT_OUTPUT=$_DIR/report.xml
+OSHT_VERBOSE=1
+
+__num=12
+
+if [ -f "/var/www/html/vendor/bin/drush" ]; then
+  __num=13
+  # Print Drupal version.
+  if [ -f "/var/www/html/composer.json" ]; then 
+    __num=14
+RUNS /var/www/html/vendor/bin/drush --root="/var/www/html" status --fields="drupal-version"
+  fi
+RUNS /var/www/html/vendor/bin/drush --version
 fi
 
-if [ -x "$(command -v apache2)" ]; then
-  apache2 -v | grep version
-  a2query -s 000-default
-else
-  printf "%sApache missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v composer)" ]; then
-  composer --version | grep version
-else
-  printf "%sComposer missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v mysql)" ]; then
-  mysql -V
-else
-  printf "%sMysql client missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v robo)" ]; then
-  robo -V
-else
-  printf "%srobo missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v node)" ]; then
-  printf "Node "
-  node --version
-else
-  printf "%sNode missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v yarn)" ]; then
-  yarn versions | grep 'versions'
-else
-  printf "%sYarn missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v phpqa)" ]; then
-  phpqa tools
-else
-  printf "%sPhpqa missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v jq)" ]; then
-  jq --version
-else
-  printf "%sJq missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v sudo)" ]; then
-  sudo --version | grep 'Sudo version'
-else
-  printf "%sSudo missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v google-chrome)" ]; then
-  google-chrome --version
-else
-  printf "%sGoogle Chrome missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
-
-if [ -x "$(command -v chromedriver)" ]; then
-  chromedriver --version
-else
-  printf "%sChromedriver missing!%s\\n" "${red}" "${end}"
-  __error=1
-fi
+RUNS php -v
+RUNS apache2 -v
+RUNS composer --version
+RUNS mysql -V
+RUNS robo -V
+RUNS node --version
+RUNS yarn versions
+RUNS phpqa tools
+RUNS jq --version
+RUNS google-chrome --version
+RUNS chromedriver --version
 
 # Get and compare Chrome and Chromedriver versions.
 __chrome_version=($(google-chrome --version))
@@ -103,28 +42,8 @@ __chromedriver_version=($(chromedriver --version))
 __chromedriver_version=${__chromedriver_version[1]}
 __chromedriver_version=(${__chromedriver_version//./ })
 __chromedriver_version=${__chromedriver_version[0]}
-if [[ $__chromedriver_version != $__chrome_version ]]; then
-  printf "%sChrome and Chromedriver versions mistmatch!%s\\n" "${red}" "${end}"
-  __error=1
-fi
 
-if [ -f "/var/www/html/vendor/bin/drush" ]; then
-  /var/www/html/vendor/bin/drush --version
-  # Print Drupal version.
-  if [ -f "/var/www/html/composer.json" ]; then 
-    /var/www/html/vendor/bin/drush --root="/var/www/html" status --fields="drupal-version"
-  fi
-else
-  # Silent fail because Drush is not installed in the no-drupal variant.
-  printf "[NOTICE] Drush not found!\\n"
-fi
+# OSHT_VERBOSE=1
+IS $__chromedriver_version == $__chrome_version
 
-printf "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-
-if [ $__error = 1 ]; then
-  printf "\\n\\n%s[ERROR] Tests failed!%s\\n\\n" "${red}" "${end}"
-  exit 1
-fi
-
-printf "\\n\\n%s[SUCCESS] Tests passed!%s\\n\\n" "${grn}" "${end}"
-exit 0
+PLAN $__num
