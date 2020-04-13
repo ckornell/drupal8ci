@@ -1,7 +1,17 @@
-image: docker:stable
-
-services:
-  - docker:dind
+default:
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    # Pull base image from Docker hub.
+    - docker pull $IMAGE_BASE || true
+    - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull $EXTRA_IMAGE || true; fi
+    # Login to Gitlab and pull current image if exist.
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
+  artifacts:
+    paths:
+      - '*.log'
 
 stages:
   # Base image is no-drupal
@@ -28,14 +38,6 @@ variables:
   SKIP_DEV: 0
   EXTRA_IMAGE: 0
 
-before_script:
-  # Pull base image from Docker hub.
-  - docker pull $IMAGE_BASE || true
-  - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull $EXTRA_IMAGE || true; fi
-  # Login to Gitlab and pull current image if exist.
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
-
 base:
   stage: base
   except:
@@ -45,7 +47,7 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Test
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE run-tests.sh > tests-${RELEASE_IMAGE}-${IMAGE}.log
     # Push to Gitlab registry for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
@@ -89,9 +91,6 @@ base:
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY;
         docker push $RELEASE_IMAGE/$IMAGE;
       fi
-  artifacts:
-    paths:
-      - '*.log'
 
 current:
   stage: current
