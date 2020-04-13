@@ -87,7 +87,7 @@ COPY *.sh /scripts/
 RUN chmod +x /scripts/*.sh \
   && chown www-data:www-data /scripts/*.sh \
   && chown chromeuser:chromeuser /scripts/*chrome*.sh \
-  && for F in /scripts/*.sh; do T="${F#/scripts/}"; T="${T::-3}"; ln -sf  /usr/local/bin/; done \
+  && ln -sf /scripts/* /usr/local/bin \
   # Symlink binaries.
   && ln -sf /var/www/.composer/vendor/bin/* /usr/local/bin \
   # Remove Apache logs to stdout from the php image (used by Drupal image).
