@@ -11,9 +11,9 @@ default:
     - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
   artifacts:
     paths:
-      - report.xml
+      - /report.xml
     reports:
-      junit: report.xml
+      junit: /report.xml
 
 stages:
   # Base image is no-drupal

@@ -4,10 +4,10 @@ set -eu
 # eval "$(curl -q -s https://raw.githubusercontent.com/coryb/osht/master/osht.sh)"
 eval "$(curl -q -s https://raw.githubusercontent.com/dcsobral/osht/bug/junitXML/osht.sh)"
 
-_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# _DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-OSHT_JUNIT_OUTPUT=$_DIR/report.xml
-OSHT_VERBOSE=1
+OSHT_JUNIT_OUTPUT=/report.xml
+# OSHT_VERBOSE=1
 
 __num=12
 
@@ -43,7 +43,7 @@ __chromedriver_version=${__chromedriver_version[1]}
 __chromedriver_version=(${__chromedriver_version//./ })
 __chromedriver_version=${__chromedriver_version[0]}
 
-# OSHT_VERBOSE=1
+OSHT_VERBOSE=1
 IS $__chromedriver_version == $__chrome_version
 
 PLAN $__num
