@@ -48,8 +48,10 @@ base:
   script:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    - docker images
     # Tests
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report > report.xml
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report
+    # - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report > report.xml
     # Push to Gitlab registry for all versions.
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
@@ -84,7 +86,8 @@ base:
     # Build the image from cache.
     - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
     # Tests
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report > report.xml
+    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report
+    # - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /run-tests.sh report > report.xml
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     # Tag for Docker hub and push.
