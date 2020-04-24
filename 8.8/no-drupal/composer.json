@@ -11,6 +11,7 @@
         "drupal/coder": "^8.3",
         "php-parallel-lint/php-parallel-lint": "^1.2",
         "php-parallel-lint/php-console-highlighter": "^0.4",
+        "php-parallel-lint/php-console-color": "^0.2",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.6",
         "sensiolabs/security-checker": "^6.0",
         "phpstan/phpstan": "^0.12.19",
