@@ -4,9 +4,8 @@ default:
     - docker:dind
   before_script:
     - docker --version
-    - echo -e "\033[1;36m SKIP_CURRENT:$SKIP_CURRENT SKIP_TRANSITION:$SKIP_TRANSITION SKIP_DEV:$SKIP_DEV CI_DO_RELEASE:$CI_DO_RELEASE \033[0;37m"
+    - echo -e "\033[1;36m DO_BASE:$DO_BASE DO_CURRENT:$DO_CURRENT DO_TRANSITION:$DO_TRANSITION DO_DEV:$DO_DEV DO_RELEASE:$DO_RELEASE \033[0;37m"
     # Pull base image from Docker hub.
-    - echo -e "\033[1;36m Pull $IMAGE_BASE - $EXTRA_IMAGE \033[0;37m"
     - docker pull --quiet $IMAGE_BASE || true
     - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull --quiet $EXTRA_IMAGE || true; fi
     # Login to Gitlab and pull current image if exist.
@@ -37,18 +36,18 @@ variables:
   DOCKER_DRIVER: overlay2
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
-  CI_DO_RELEASE: 1
-  SKIP_BASE: 0
-  SKIP_CURRENT: 0
-  SKIP_TRANSITION: 0
-  SKIP_DEV: 0
+  DO_RELEASE: 1
+  DO_BASE: 1
+  DO_CURRENT: 1
+  DO_TRANSITION: 1
+  DO_DEV: 1
   EXTRA_IMAGE: 0
 
 base:
   stage: base
   except:
     variables:
-      - $SKIP_BASE == "1"
+      - $DO_BASE == "0"
   script:
     # Build the image from cache.
     - echo -e "\033[1;36m Build $CI_REGISTRY_IMAGE/$IMAGE from $DIR \033[0;37m"
@@ -60,24 +59,24 @@ base:
     # Push to Gitlab registry for all versions.
     - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV $CI_REGISTRY_IMAGE/$IMAGE_TEST \033[0;37m"
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+    - if (( $DO_TRANSITION )); then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if [ ! $SKIP_TRANSITION ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+    - if (( $DO_TRANSITION )); then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     - docker images
     # Login, tag and push to Docker hub.
     - |
-      if [ ${CI_DO_RELEASE} == 1 ]; then
+      if (( $DO_RELEASE )); then
         echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV \033[0;37m"
         docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
         docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
-        if [ ! $SKIP_TRANSITION ]; then
+        if (( $DO_TRANSITION )); then
           docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST
         fi
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
         docker push $RELEASE_IMAGE/$IMAGE
         docker push $RELEASE_IMAGE/$IMAGE_DEV
-        if [ ! $SKIP_TRANSITION ]
+        if [ ! $DO_TRANSITION ]
           then push $RELEASE_IMAGE/$IMAGE_TEST
         fi
       fi
@@ -107,7 +106,7 @@ base:
     - docker images
     # Login to Docker hub, tag and push.
     - |
-      if [ ${CI_DO_RELEASE} == 1 ]; then
+      if (( $DO_RELEASE )); then
         echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE \033[0;37m"
         docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
@@ -118,7 +117,7 @@ current:
   stage: current
   except:
     variables:
-      - $SKIP_CURRENT == "1"
+      - $DO_CURRENT == "1"
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT}-drupal
@@ -129,7 +128,7 @@ transition:
   stage: transition
   except:
     variables:
-      - $SKIP_TRANSITION == "1"
+      - $DO_TRANSITION == "1"
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_TRANSITION}-drupal
@@ -140,7 +139,7 @@ dev:
   stage: dev
   except:
     variables:
-      - $SKIP_DEV == "1"
+      - $DO_DEV == "1"
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_DEV}-drupal
