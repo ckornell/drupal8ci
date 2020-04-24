@@ -45,9 +45,8 @@ variables:
 
 base:
   stage: base
-  except:
-    variables:
-      - $DO_BASE == "0"
+  rules:
+    - if: '$DO_BASE == "1"'
   script:
     # Build the image from cache.
     - echo -e "\033[1;36m Build $CI_REGISTRY_IMAGE/$IMAGE from $DIR \033[0;37m"
@@ -63,6 +62,7 @@ base:
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if (( $DO_TRANSITION )); then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+  after_script:
     - docker images
     # Login, tag and push to Docker hub.
     - |
@@ -103,6 +103,7 @@ base:
     - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE \033[0;37m"
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
+  after_script:
     - docker images
     # Login to Docker hub, tag and push.
     - |
@@ -115,9 +116,8 @@ base:
 
 current:
   stage: current
-  except:
-    variables:
-      - $DO_CURRENT == "1"
+  rules:
+    - if: '$DO_CURRENT == "1"'
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT}-drupal
@@ -126,9 +126,8 @@ current:
 
 transition:
   stage: transition
-  except:
-    variables:
-      - $DO_TRANSITION == "1"
+  rules:
+    - if: '$DO_TRANSITION == "1"'
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_TRANSITION}-drupal
@@ -137,9 +136,8 @@ transition:
 
 dev:
   stage: dev
-  except:
-    variables:
-      - $DO_DEV == "1"
+  rules:
+    - if: '$DO_DEV == "1"'
   extends: .build_test_release
   variables:
     IMAGE: drupal8ci:${DRUPAL_DEV}-drupal
