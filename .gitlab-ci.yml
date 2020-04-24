@@ -3,15 +3,16 @@ default:
   services:
     - docker:dind
   before_script:
+    - docker --version
     - echo -e "\033[1;36m SKIP_CURRENT:$SKIP_CURRENT SKIP_TRANSITION:$SKIP_TRANSITION SKIP_DEV:$SKIP_DEV CI_DO_RELEASE:$CI_DO_RELEASE \033[0;37m"
     # Pull base image from Docker hub.
     - echo -e "\033[1;36m Pull $IMAGE_BASE - $EXTRA_IMAGE \033[0;37m"
-    - docker pull $IMAGE_BASE || true
-    - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull $EXTRA_IMAGE || true; fi
+    - docker pull --quiet $IMAGE_BASE || true
+    - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull --quiet $EXTRA_IMAGE || true; fi
     # Login to Gitlab and pull current image if exist.
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - echo -e "\033[1;36m Pull $CI_REGISTRY_IMAGE/$IMAGE \033[0;37m"
-    - docker pull $CI_REGISTRY_IMAGE/$IMAGE || true
+    - docker pull --quiet $CI_REGISTRY_IMAGE/$IMAGE || true
   artifacts:
     paths:
       - report.xml
@@ -30,7 +31,7 @@ stages:
 
 variables:
   DRUPAL_CURRENT: '8.8'
-  DRUPAL_TEST: '8.9'
+  DRUPAL_TRANSITION: '8.9'
   DRUPAL_DEV: '9.0'
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
@@ -57,20 +58,22 @@ base:
     # Tests
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report > report.xml
     # Push to Gitlab registry for all versions.
-    - echo -e "\033[1;36m Prepare $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV \033[0;37m"
+    - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV $CI_REGISTRY_IMAGE/$IMAGE_TEST \033[0;37m"
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
     - if [ ! $SKIP_TRANSITION ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
-    # Tag for Docker hub and push all versions.
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
-    - if [ ! $SKIP_TRANSITION ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST; fi
     - docker images
-    # Login and push to Docker hub.
+    # Login, tag and push to Docker hub.
     - |
       if [ ${CI_DO_RELEASE} == 1 ]; then
+        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV \033[0;37m"
+        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
+        if [ ! $SKIP_TRANSITION ]; then
+          docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST
+        fi
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
         docker push $RELEASE_IMAGE/$IMAGE
         docker push $RELEASE_IMAGE/$IMAGE_DEV
@@ -81,7 +84,7 @@ base:
 
   variables:
     IMAGE: drupal8ci:${DRUPAL_CURRENT}-no-drupal
-    IMAGE_TEST: drupal8ci:${DRUPAL_TEST}-no-drupal
+    IMAGE_TEST: drupal8ci:${DRUPAL_TRANSITION}-no-drupal
     IMAGE_DEV: drupal8ci:${DRUPAL_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT}/no-drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
@@ -98,14 +101,15 @@ base:
     - docker images
     # Tests
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report > report.xml
-    - echo -e "\033[1;36m Prepare $CI_REGISTRY_IMAGE/$IMAGE \033[0;37m"
+    - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE \033[0;37m"
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
-    # Tag for Docker hub and push.
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    # Login to Docker hub and push.
+    - docker images
+    # Login to Docker hub, tag and push.
     - |
       if [ ${CI_DO_RELEASE} == 1 ]; then
+        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE \033[0;37m"
+        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
         docker push $RELEASE_IMAGE/$IMAGE
       fi
@@ -117,8 +121,8 @@ current:
       - $SKIP_CURRENT == "1"
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_TEST}-drupal
-    DIR: '${DRUPAL_TEST}/drupal'
+    IMAGE: drupal8ci:${DRUPAL_CURRENT}-drupal
+    DIR: '${DRUPAL_CURRENT}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
 
 transition:
@@ -128,8 +132,8 @@ transition:
       - $SKIP_TRANSITION == "1"
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_TEST}-drupal
-    DIR: '${DRUPAL_TEST}/drupal'
+    IMAGE: drupal8ci:${DRUPAL_TRANSITION}-drupal
+    DIR: '${DRUPAL_TRANSITION}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
 
 dev:
