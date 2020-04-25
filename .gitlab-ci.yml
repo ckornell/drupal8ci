@@ -82,9 +82,10 @@ base:
       fi
 
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT}-no-drupal
-    IMAGE_TEST: drupal8ci:${DRUPAL_TRANSITION}-no-drupal
-    IMAGE_DEV: drupal8ci:${DRUPAL_DEV}-no-drupal
+    # Format is for Gitlab ci for Drupal: drupal8ci:${CI_REF}-${CI_DRUPAL_VERSION}-${CI_DRUPAL}
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
+    IMAGE_TEST: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}-no-drupal
+    IMAGE_DEV: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_DEV}-no-drupal
     DIR: '${DRUPAL_CURRENT}/no-drupal'
     IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
     EXTRA_IMAGE: composer:latest
@@ -120,9 +121,9 @@ current:
     - if: '$DO_CURRENT == "1"'
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_CURRENT}-drupal
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-drupal
     DIR: '${DRUPAL_CURRENT}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
 
 transition:
   stage: transition
@@ -130,9 +131,9 @@ transition:
     - if: '$DO_TRANSITION == "1"'
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_TRANSITION}-drupal
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}-drupal
     DIR: '${DRUPAL_TRANSITION}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
 
 dev:
   stage: dev
@@ -140,6 +141,6 @@ dev:
     - if: '$DO_DEV == "1"'
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${DRUPAL_DEV}-drupal
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_DEV}-drupal
     DIR: '${DRUPAL_DEV}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${DRUPAL_CURRENT}-no-drupal
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
