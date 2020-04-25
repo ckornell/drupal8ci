@@ -8,7 +8,7 @@ LABEL maintainer="dev-drupal.com"
 USER www-data
 
 # Add Drupal project with dev and Drush.
-RUN composer create-project drupal/recommended-project:${RELEASE_TAG} /var/www/html --no-interaction --no-ansi \
+RUN composer create-project drupal/recommended-project:~${RELEASE_TAG} /var/www/html --no-interaction --no-ansi \
   && composer require drupal/core-dev:~${DEV_TAG} drush/drush:~10 --working-dir=/var/www/html --no-interaction --no-ansi --no-suggest \
   && composer update phpunit/phpunit phpspec/prophecy symfony/yaml --working-dir=/var/www/html --with-dependencies --no-progress \
   && composer clear-cache \
