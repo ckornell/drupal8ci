@@ -58,26 +58,26 @@ base:
     # Push to Gitlab registry for all versions.
     - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV $CI_REGISTRY_IMAGE/$IMAGE_TEST \033[0;37m"
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if (( $DO_TRANSITION )); then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+    - if [ $DO_TRANSITION == 1 ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
     - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if (( $DO_TRANSITION )); then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
+    - if [ $DO_TRANSITION == 1 ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
   after_script:
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
+    - if [ $DO_TRANSITION == 1 ]; then
+        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST;
+      fi
     - docker images
     # Login, tag and push to Docker hub.
     - |
-      if (( $DO_RELEASE )); then
-        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV \033[0;37m"
-        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
-        if (( $DO_TRANSITION )); then
-          docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST
-        fi
+      if [ $DO_RELEASE == 1 ]; then
+        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV to $RELEASE_REGISTRY with user $RELEASE_USER \033[0;37m"
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
         docker push $RELEASE_IMAGE/$IMAGE
         docker push $RELEASE_IMAGE/$IMAGE_DEV
-        if [ ! $DO_TRANSITION ]
-          then push $RELEASE_IMAGE/$IMAGE_TEST
+        if [ ! $DO_TRANSITION ]; then
+          docker push $RELEASE_IMAGE/$IMAGE_TEST
         fi
       fi
 
@@ -104,12 +104,12 @@ base:
     # Push to Gitlab registry for next steps.
     - docker push $CI_REGISTRY_IMAGE/$IMAGE
   after_script:
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
     - docker images
     # Login to Docker hub, tag and push.
     - |
-      if (( $DO_RELEASE )); then
-        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE \033[0;37m"
-        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
+      if [ $DO_RELEASE == 1 ]; then
+        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE to $RELEASE_REGISTRY with user $RELEASE_USER \033[0;37m"
         docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
         docker push $RELEASE_IMAGE/$IMAGE
       fi
