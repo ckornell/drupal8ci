@@ -73,6 +73,7 @@ USER www-data
 WORKDIR /var/www/.composer
 
 # Put a turbo on composer, install phpqa + tools + Robo + Coder.
+# see composer.json
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-ansi --no-suggest \
   && composer clear-cache \
   && rm -rf /var/www/.composer/cache/*

@@ -4,7 +4,8 @@ default:
     - docker:dind
   before_script:
     - docker --version
-    - echo -e "\033[1;36m DO_BASE:$DO_BASE DO_CURRENT:$DO_CURRENT DO_TRANSITION:$DO_TRANSITION DO_DEV:$DO_DEV DO_RELEASE:$DO_RELEASE \033[0;37m"
+    - echo -e "\033[1;36m DO_RELEASE:$DO_RELEASE RELEASE_IMAGE:$RELEASE_IMAGE WITH_CACHE:$WITH_CACHE \033[0;37m"
+    - echo -e "\033[1;36m DRUPAL_CURRENT:$DRUPAL_CURRENT DRUPAL_TRANSITION:$DRUPAL_TRANSITION DRUPAL_DEV:$DRUPAL_DEV \033[0;37m"
     # Pull base image from Docker hub.
     - docker pull --quiet $IMAGE_BASE || true
     - if [ ! $EXTRA_IMAGE == 0 ]; then docker pull --quiet $EXTRA_IMAGE || true; fi
@@ -19,14 +20,9 @@ default:
       junit: report.xml
 
 stages:
-  # Base image is no-drupal
+  # Base image is without drupal.
   - base
-  # Current version.
-  - current
-  # Transition version, alpha, beta, rc...
-  - transition
-  # Dev version.
-  - dev
+  - drupal
 
 variables:
   DRUPAL_CURRENT: '8.8'
@@ -37,67 +33,22 @@ variables:
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
   DO_RELEASE: 1
-  DO_BASE: 1
-  DO_CURRENT: 1
-  DO_TRANSITION: 1
-  DO_DEV: 1
+  # Cache seems too hard...
+  WITH_CACHE: 0
   EXTRA_IMAGE: 0
-
-base:
-  stage: base
-  rules:
-    - if: '$DO_BASE == "1"'
-  script:
-    # Build the image from cache.
-    - echo -e "\033[1;36m Build $CI_REGISTRY_IMAGE/$IMAGE from $DIR \033[0;37m"
-    # - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
-    - docker build --compress --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
-    - docker images
-    # Tests
-    - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report > report.xml
-    # Push to Gitlab registry for all versions.
-    - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV $CI_REGISTRY_IMAGE/$IMAGE_TEST \033[0;37m"
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if [ $DO_TRANSITION == 1 ]; then docker tag $CI_REGISTRY_IMAGE/$IMAGE $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE_DEV
-    - if [ $DO_TRANSITION == 1 ]; then docker push $CI_REGISTRY_IMAGE/$IMAGE_TEST; fi
-  after_script:
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV
-    - if [ $DO_TRANSITION == 1 ]; then
-        docker tag $CI_REGISTRY_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_TEST;
-      fi
-    - docker images
-    # Login, tag and push to Docker hub.
-    - |
-      if [ $DO_RELEASE == 1 ]; then
-        echo -e "\033[1;36m Push $RELEASE_IMAGE/$IMAGE $RELEASE_IMAGE/$IMAGE_DEV to $RELEASE_REGISTRY with user $RELEASE_USER \033[0;37m"
-        docker login -u $RELEASE_USER -p $RELEASE_PASSWORD $RELEASE_REGISTRY
-        docker push $RELEASE_IMAGE/$IMAGE
-        docker push $RELEASE_IMAGE/$IMAGE_DEV
-        if [ ! $DO_TRANSITION ]; then
-          docker push $RELEASE_IMAGE/$IMAGE_TEST
-        fi
-      fi
-
-  variables:
-    # Format is for Gitlab ci for Drupal: drupal8ci:${CI_REF}-${CI_DRUPAL_VERSION}-${CI_DRUPAL}
-    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
-    IMAGE_TEST: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}-no-drupal
-    IMAGE_DEV: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_DEV}-no-drupal
-    DIR: '${DRUPAL_CURRENT}/no-drupal'
-    IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
-    EXTRA_IMAGE: composer:latest
 
 .build_test_release:
   script:
-    # Make sure we are using Gitlab image as base.
+    # Make sure we are using Gitlab image as base and not docker hub (will do nothing for base).
     - sed -i "s#FROM mogtofu33/drupal8ci#FROM ${CI_REGISTRY_IMAGE}/drupal8ci#g" ${CI_PROJECT_DIR}/$DIR/Dockerfile
-    # Build the image from cache.
+    # Build the image.
     - echo -e "\033[1;36m Build $CI_REGISTRY_IMAGE/$IMAGE from $DIR \033[0;37m"
-    # - docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
-    - docker build --compress --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+    - |
+      if [ $WITH_CACHE == 1 ]; then
+        docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+      else
+        docker build --compress --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
+      fi
     - docker images
     # Tests
     - docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report > report.xml
@@ -115,32 +66,43 @@ base:
         docker push $RELEASE_IMAGE/$IMAGE
       fi
 
-current:
-  stage: current
-  rules:
-    - if: '$DO_CURRENT == "1"'
+base:
+  stage: base
   extends: .build_test_release
   variables:
+    # Format is for Gitlab ci for Drupal: drupal8ci:${CI_REF}-${CI_DRUPAL_VERSION}
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-base
+    DIR: '${DRUPAL_CURRENT}/base'
+    # Base official image.
+    IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
+    EXTRA_IMAGE: composer:latest
+
+current:
+  stage: drupal
+  dependencies:
+    - base
+  extends: .build_test_release
+  variables:
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-base
     IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}
     DIR: '${DRUPAL_CURRENT}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
 
 transition:
-  stage: transition
-  rules:
-    - if: '$DO_TRANSITION == "1"'
+  stage: drupal
+  dependencies:
+    - base
   extends: .build_test_release
   variables:
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-base
     IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}
     DIR: '${DRUPAL_TRANSITION}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
 
 dev:
-  stage: dev
-  rules:
-    - if: '$DO_DEV == "1"'
+  stage: drupal
+  dependencies:
+    - base
   extends: .build_test_release
   variables:
+    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-base
     IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_DEV}
     DIR: '${DRUPAL_DEV}/drupal'
-    IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
