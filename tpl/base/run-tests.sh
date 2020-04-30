@@ -68,13 +68,11 @@ if [ ${1:-""} = "report" ]; then
 
   # Force report file.
   OSHT_JUNIT=1
-  OSHT_JUNIT_OUTPUT=/tmp/report.xml
+  OSHT_JUNIT_OUTPUT=/tmp/report/report.xml
 
   get_num_tests
 
-  # Silent and return xml.
-  tests=$(run_tests 1 &>/dev/null)
-  cat /tmp/report.xml
+  run_tests 1
 
 else
   echo -e "-------------- Tests --------------"

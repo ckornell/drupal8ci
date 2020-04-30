@@ -56,7 +56,7 @@ variables:
     - |
       if [ $SKIP_TESTS == 0 ]; then
         echo -e "\033[1;36m Run $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report \033[0;37m"
-        docker run --rm -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report > report.xml
+        docker run --rm -v $CI_PROJECT_DIR:/tmp/report -t $CI_REGISTRY_IMAGE/$IMAGE /scripts/run-tests.sh report
       fi
     - echo -e "\033[1;36m Push $CI_REGISTRY_IMAGE/$IMAGE \033[0;37m"
     # Push to Gitlab registry for next steps.
