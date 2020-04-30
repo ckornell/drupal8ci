@@ -121,7 +121,7 @@ current:
     - if: '$DO_CURRENT == "1"'
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-drupal
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}
     DIR: '${DRUPAL_CURRENT}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
 
@@ -131,7 +131,7 @@ transition:
     - if: '$DO_TRANSITION == "1"'
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}-drupal
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}
     DIR: '${DRUPAL_TRANSITION}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
 
@@ -141,6 +141,6 @@ dev:
     - if: '$DO_DEV == "1"'
   extends: .build_test_release
   variables:
-    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_DEV}-drupal
+    IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_DEV}
     DIR: '${DRUPAL_DEV}/drupal'
     IMAGE_BASE: ${CI_REGISTRY_IMAGE}/drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}-no-drupal
