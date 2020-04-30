@@ -4,7 +4,7 @@ default:
     - docker:dind
   before_script:
     - docker --version
-    - echo -e "\033[1;36m DO_RELEASE:$DO_RELEASE RELEASE_IMAGE:$RELEASE_IMAGE WITH_CACHE:$WITH_CACHE \033[0;37m"
+    - echo -e "\033[1;36m DO_RELEASE:$DO_RELEASE RELEASE_IMAGE:$RELEASE_IMAGE SKIP_CACHE:$SKIP_CACHE \033[0;37m"
     - echo -e "\033[1;36m DRUPAL_CURRENT:$DRUPAL_CURRENT DRUPAL_TRANSITION:$DRUPAL_TRANSITION DRUPAL_DEV:$DRUPAL_DEV \033[0;37m"
     # Pull base image from Docker hub.
     - docker pull --quiet $IMAGE_BASE || true
@@ -32,9 +32,10 @@ variables:
   DOCKER_DRIVER: overlay2
   RELEASE_REGISTRY: docker.io
   RELEASE_IMAGE: index.docker.io/$RELEASE_USER
+  # Publish result image to Docker Hub.
   DO_RELEASE: 1
-  # Cache seems too hard...
-  WITH_CACHE: 0
+  # Cache seems too hard, skip by default...
+  SKIP_CACHE: 1
   SKIP_TESTS: 0
   EXTRA_IMAGE: 0
 
@@ -45,7 +46,7 @@ variables:
     # Build the image.
     - echo -e "\033[1;36m Build $CI_REGISTRY_IMAGE/$IMAGE from $DIR \033[0;37m"
     - |
-      if [ $WITH_CACHE == 1 ]; then
+      if [ $SKIP_CACHE == 0 ]; then
         docker build --compress --cache-from $CI_REGISTRY_IMAGE/$IMAGE --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
       else
         docker build --compress --tag $CI_REGISTRY_IMAGE/$IMAGE $DIR
@@ -82,7 +83,7 @@ base:
     IMAGE_BASE: drupal:${DRUPAL_CURRENT}-apache
     EXTRA_IMAGE: composer:latest
 
-current:$DRUPAL_CURRENT:
+current:
   stage: drupal
   dependencies:
     - base
@@ -92,7 +93,7 @@ current:$DRUPAL_CURRENT:
     IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_CURRENT}
     DIR: '${DRUPAL_CURRENT}/drupal'
 
-transition:$DRUPAL_TRANSITION:
+transition:
   stage: drupal
   dependencies:
     - base
@@ -102,7 +103,7 @@ transition:$DRUPAL_TRANSITION:
     IMAGE: drupal8ci:${CI_COMMIT_BRANCH}-${DRUPAL_TRANSITION}
     DIR: '${DRUPAL_TRANSITION}/drupal'
 
-dev:$DRUPAL_DEV:
+dev:
   stage: drupal
   dependencies:
     - base
