@@ -39,8 +39,8 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   git \
   unzip \
   vim \
-  # Install xsl, mysqli, xdebug, imagick.
-  && docker-php-ext-install xsl mysqli \
+  # Install intl, xsl, mysqli, xdebug, imagick.
+  && docker-php-ext-install intl xsl mysqli \
   && pecl install imagick xdebug \
   && docker-php-ext-enable imagick xdebug \
   && apt-get clean \
