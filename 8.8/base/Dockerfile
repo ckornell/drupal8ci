@@ -15,12 +15,13 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   software-properties-common \
   sudo \
   curl \
+  ssh \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #==================
 # Install Nodejs, Yarn, Chrome, php extensions, needed programs.
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
   && curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
   # Google Chrome latest stable release.
