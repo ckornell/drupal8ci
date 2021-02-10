@@ -1,54 +1,31 @@
-define docker_build
-	docker build -t=$(1) $(2);
+DRUPAL_STABLE=8.8
+DRUPAL_DEV=8.9
+DRUPAL_DEV_RELEASE=8.9
+DRUPAL_TEST=9.0
+DRUPAL_TEST_RELEASE=9.0
+RELEASE=2.x-dev
+
+TPL=tpl
+
+define prepare
+	@echo "Prepare $(3) from ${TPL} for release $(2)..."
+	@rm -rf ./$(3)/;
+	@cp -r ./${TPL}/ ./$(3)/;
+	@RELEASE="$(RELEASE)" IMAGE_TAG="$(1)" RELEASE_TAG="$(2)" DEV_TAG="$(3)" envsubst < "./$(TPL)/drupal/Dockerfile" > "./$(3)/drupal/Dockerfile";
+	@RELEASE="$(RELEASE)" IMAGE_TAG="$(1)" envsubst < "./$(TPL)/base/Dockerfile" > "./$(3)/base/Dockerfile";
+	@RELEASE="$(RELEASE)" IMAGE_TAG="$(1)" envsubst < "./$(TPL)/base/composer.json" > "./$(3)/base/composer.json";
+	@echo "...Done!"
 endef
 
-define docker_clean
-	-docker stop $(1);
-	-docker rm $(1);
-endef
+prepare:
+	$(call prepare,${DRUPAL_STABLE},${DRUPAL_STABLE},${DRUPAL_STABLE})
+	$(call prepare,${DRUPAL_STABLE},${DRUPAL_DEV_RELEASE},${DRUPAL_DEV})
+	@rm -rf ${DRUPAL_DEV}/base
+ifeq "${DRUPAL_TEST}" ""
+	@echo "[[ Skipping test ]]"
+else
+	$(call prepare,${DRUPAL_STABLE},${DRUPAL_TEST_RELEASE},${DRUPAL_TEST})
+	@rm -rf ${DRUPAL_TEST}/base
+endif
 
-define docker_tests
-	docker run --rm -t $(1) /scripts/run-tests.sh
-endef
-
-define file_prepare
-	@cp -r ./8.x/ ./$(1)/;
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/drupal/Dockerfile.tpl" > "./$(1)/drupal/Dockerfile";
-	@rm -f "./$(1)/drupal/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/no-drupal/Dockerfile.tpl" > "./$(1)/no-drupal/Dockerfile";
-	@rm -f "./$(1)/no-drupal/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium/Dockerfile.tpl" > "./$(1)/selenium/Dockerfile";
-	@rm -f "./$(1)/selenium/Dockerfile.tpl";
-	@DRUPAL_TAG="$(1)" envsubst < "./$(1)/selenium-no-drupal/Dockerfile.tpl" > "./$(1)/selenium-no-drupal/Dockerfile";
-	@rm -f "./$(1)/selenium-no-drupal/Dockerfile.tpl";
-endef
-
-define clean_prepare
-	@rm -rf ./$(1)/;
-endef
-
-prepare: clean_prepare file_prepare
-
-file_prepare:
-	$(call file_prepare,8.7)
-
-clean_prepare:
-	$(call clean_prepare,8.7)
-
-test: clean-containers build build_tests
-
-build:
-	$(call docker_build,drupal8ci_8_7,./8.7/drupal)
-
-build_tests:
-	$(call docker_tests,drupal8ci_8_7)
-
-clean: clean-containers clean-images
-
-clean-containers:
-	$(call docker_clean,drupal8ci_8_7)
-
-clean-images:
-	-docker rmi drupal8ci_8_7;
-
-.PHONY: test clean prepare build run
+.PHONY: prepare
